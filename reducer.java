@@ -29,7 +29,7 @@ public class reducer {
                     Map<String, Map<String,String>> resultFromWorker = (Map<String, Map<String,String>>) inputStream.readObject(); //HashMap
 
                     // Connect to master
-                    Socket MasterSocket = new Socket("localhost", 12345);
+                    Socket MasterSocket = new Socket("localhost", 12348);
                     System.out.println("Connected to Master");
 
 

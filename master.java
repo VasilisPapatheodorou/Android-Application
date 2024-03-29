@@ -77,13 +77,32 @@ public class master {
                 switch (clientChoice) {
                     case "1":
                         // Connect to worker node and perform "Add Accommodation" operation
-                        Map<String, Map<String,String>> wordCount = connectToWorkerNodeAndPerformOperation("Add Accommodation",Data);
-                        output.println("Word count result: " + wordCount);
+                        connectToWorkerNodeAndPerformOperation("Add Accommodation",Data);
+                        
+                        //building connection with reducer
+                        try (ServerSocket serverSocket = new ServerSocket(12348)) {
+                            System.out.println("Server started. Waiting for reducer...");
+                            Socket reducerSocket = serverSocket.accept(); // Accept reducer connection
+                            System.out.println("Reducer connected: " + reducerSocket);
+
+                            // Create input and output streams for communication with reducer
+                            BufferedReader inputReducer = new BufferedReader(new InputStreamReader(reducerSocket.getInputStream()));
+                            System.out.println(inputReducer);
+                        }
                         break;
                     case "2":
                         // Connect to worker node and perform "Rent Accommodation" operation
-                        Map<String, Map<String,String>> rentStats = connectToWorkerNodeAndPerformOperation("Rent Accommodation",Data);
-                        output.println("Rent statistics: " + rentStats);
+                        connectToWorkerNodeAndPerformOperation("Rent Accommodation",Data);
+                        //building connection with reducer
+                        try (ServerSocket serverSocket = new ServerSocket(12348)) {
+                            System.out.println("Server started. Waiting for reducer...");
+                            Socket reducerSocket = serverSocket.accept(); // Accept reducer connection
+                            System.out.println("Reducer connected: " + reducerSocket);
+
+                            // Create input and output streams for communication with reducer
+                            BufferedReader inputReducer = new BufferedReader(new InputStreamReader(reducerSocket.getInputStream()));
+                            System.out.println(inputReducer);
+                        }
                         break;
                     case "3":
                         // Exit
