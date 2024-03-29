@@ -122,7 +122,7 @@ public class master {
         }
 
         // Method to connect to worker node and perform operation
-        private Map<String, Map<String,String>> connectToWorkerNodeAndPerformOperation(String operation,Map<String,Map<String,String>> Data) throws ClassNotFoundException {
+        private void connectToWorkerNodeAndPerformOperation(String operation,Map<String,Map<String,String>> Data) throws ClassNotFoundException {
             Map<String, Map<String,String>> result = new HashMap<>();
 
             try {
@@ -150,8 +150,6 @@ public class master {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-            return result;
         }
     }
 
