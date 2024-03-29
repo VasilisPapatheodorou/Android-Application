@@ -16,14 +16,14 @@ public class workerNode {
         System.out.println("Worker node started. Waiting for server...");
         
         //Create dynamic memory for the worker
-        Map<String,Map<String,String>> Memory = null; 
+        Map<String,Map<String,String>> memory = null; 
         
         while (true) {
             Socket serverConnection = serverSocket.accept(); // Accept connection from server
             System.out.println("Server connected: " + serverConnection);
 
             // Start a new thread to handle each client connection
-            Thread clientHandlerThread = new Thread(new ClientHandler(serverConnection));
+            Thread clientHandlerThread = new Thread(new ClientHandler(serverConnection,memory));
             clientHandlerThread.start();
         }
     }
@@ -31,9 +31,11 @@ public class workerNode {
     // ClientHandler class to handle each client connection
     private static class ClientHandler implements Runnable {
         private final Socket serverConnection;
+        private Map<String, Map<String, String>> memory;
 
-        public ClientHandler(Socket serverConnection) {
+        public ClientHandler(Socket serverConnection, Map<String, Map<String, String>> memory) {
             this.serverConnection = serverConnection;
+            this.memory = memory;
         }
 
         @Override
@@ -47,12 +49,12 @@ public class workerNode {
                 // Read operation from server
                 String operation = input.readLine();
                 System.out.println("Operation received: " + operation);
-
+                
                 // Read the map sent by the master
                 Map<String, Map<String, String>> data = (Map<String, Map<String, String>>) inputStream.readObject(); //HashMap
-
+                
                 // Process the data based on the operation
-                Map<String, Map<String, String>> result = processOperation(operation, data);
+                Map<String, Map<String, String>> result = processOperation(operation, data, memory);
 
                 // Connect to reducer
                 Socket reducerSocket = new Socket("localhost", 12347);
@@ -73,13 +75,15 @@ public class workerNode {
         }
 
         // Method to process the operation
-        private Map<String, Map<String, String>> processOperation(String operation, Map<String, Map<String, String>> data) {
+        private Map<String, Map<String, String>> processOperation(String operation, Map<String, Map<String, String>> data, Map<String, Map<String, String>> memory) {
             // New map to store rooms in Area3
             Map<String, Map<String, String>> result = new HashMap<>();
 
             if (operation.equals("Add Accommodation")) {
-                
-            } else if (operation.equals("Rent Accommodation")) {
+                result = data;
+                memory = data;
+            } 
+            else if (operation.equals("Search Accommodation")) {
                 for (Map.Entry<String, Map<String, String>> entry : data.entrySet()) {
                     String roomName = entry.getKey(); // Get the room name
                     Map<String, String> roomDetails = entry.getValue(); // Get the room details
@@ -90,6 +94,15 @@ public class workerNode {
                         result.put(roomName, roomDetails);
                     }
                 }
+            }
+            else if (operation.equals("Rent Accommodation")) {
+                
+            }
+            else if (operation.equals("Rate Accommodation")) {
+                
+            }
+            else if (operation.equals("Add Accommodation")) {
+                
             }
             return result;
         }

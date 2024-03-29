@@ -20,7 +20,6 @@ public class master {
         int NumberofWorkers = random.nextInt(3) + 2;
         //Initialize workers
 
-
         try {
 
             try (ServerSocket serverSocket = new ServerSocket(12345)) {
@@ -59,43 +58,50 @@ public class master {
                 PrintWriter output = new PrintWriter(clientSocket.getOutputStream(), true);
 
                 // Send the option menu to the client
-                output.println("Welcome to Booking App! What do you want to do?");
+                output.println("Welcome to Booking App!");
+                //output.println("1. Add Accommodation");
+                //output.println("2. Rent accomodation");
+                //output.println("3. Rate accomodation");
+                //output.println("4. Search Accommodation");
+                //output.println("5. Show reservations");
+                //output.println("6. Exit");
 
                 // Read client's choice
                 String clientChoice = input.readLine();
 
-                // Ask for data
-                output.println("Insert Data");
-
-                // Read client's data (assuming it's the file path)
-                String jsonDataFilePath = input.readLine();
-
-                // Parse JSON data from the file
-                Map<String, Map<String,String>> Data = parseJsonFromFile(jsonDataFilePath);
-
                 // Process client's choice
                 switch (clientChoice) {
                     case "1":
+                        // Ask for data to add accomodation
+                        output.println("Insert Data");
+                        // Read client's data (assuming it's the file path)
+                        String jsonDataFilePath = input.readLine();
+                        // Parse JSON data from the file
+                        Map<String, Map<String,String>> Data = parseJsonFromFile(jsonDataFilePath);
                         // Connect to worker node and perform "Add Accommodation" operation
                         connectToWorkerNodeAndPerformOperation("Add Accommodation",Data);
-                        
-                        //building connection with reducer
                         try (ServerSocket serverSocket = new ServerSocket(12348)) {
                             System.out.println("Server started. Waiting for reducer...");
                             Socket reducerSocket = serverSocket.accept(); // Accept reducer connection
                             System.out.println("Reducer connected: " + reducerSocket);
-
-                            // Create input and output streams for communication with reducer
-                            BufferedReader inputReducer = new BufferedReader(new InputStreamReader(reducerSocket.getInputStream()));
-                            String s = null;
-                            while ((s=inputReducer.readLine())!=null){
-                                System.out.println(s);
-                            }
+                            // Creating input stream for communication with reducer
+                            ObjectInputStream inputStream = new ObjectInputStream(reducerSocket.getInputStream());
+                            System.out.println(inputStream.readObject());
                         }
                         break;
                     case "2":
-                        // Connect to worker node and perform "Rent Accommodation" operation
-                        connectToWorkerNodeAndPerformOperation("Rent Accommodation",Data);
+                        output.println("Rent accomodation");
+                        break;
+                    case "3":
+                        output.println("Rate accomodation");
+                        break;
+                    case "4":
+                        // Ask for data
+                        output.println("Choose filter");
+                        // Read client's data (assuming it's the file path)
+                        String filter = input.readLine();
+                        // Connect to worker node and perform "Search Accommodation" operation
+                        //connectToWorkerNodeAndPerformOperation("Search Accommodation",Data);
                         //building connection with reducer
                         try (ServerSocket serverSocket = new ServerSocket(12348)) {
                             System.out.println("Server started. Waiting for reducer...");
@@ -106,7 +112,10 @@ public class master {
                             System.out.println(inputStream.readObject());
                         }
                         break;
-                    case "3":
+                    case "5":
+                        output.println("Show reservations");
+                        break;
+                    case "6":
                         // Exit
                         output.println("Goodbye!");
                         break;

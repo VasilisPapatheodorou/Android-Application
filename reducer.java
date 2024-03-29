@@ -27,7 +27,7 @@ public class reducer {
 
                     // Read the map sent by the worker
                     Map<String, Map<String,String>> resultFromWorker = (Map<String, Map<String,String>>) inputStream.readObject(); //HashMap
-
+                    
                     // Connect to master
                     Socket MasterSocket = new Socket("localhost", 12348);
                     System.out.println("Connected to Master");
