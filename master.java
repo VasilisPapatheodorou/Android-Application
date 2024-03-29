@@ -8,8 +8,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-//javac -cp json-simple-1.1.jar master.java
-//java -cp .;json-simple-1.1.jar master
+//javac -cp json-simple-1.1.1.jar master.java
+//java -cp .;json-simple-1.1.1.jar master
 
 public class master {
     public static void main(String[] args) {
