@@ -37,8 +37,6 @@ public class reducer {
                     ObjectOutputStream outputMasterStream = new ObjectOutputStream(MasterSocket.getOutputStream());
                     outputMasterStream.writeObject(resultFromWorker);
 
-                    System.out.println(resultFromWorker);
-
                     // Close connections
                     MasterSocket.close();
                     input.close();

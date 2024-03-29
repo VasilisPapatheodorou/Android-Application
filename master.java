@@ -87,7 +87,10 @@ public class master {
 
                             // Create input and output streams for communication with reducer
                             BufferedReader inputReducer = new BufferedReader(new InputStreamReader(reducerSocket.getInputStream()));
-                            System.out.println(inputReducer);
+                            String s = null;
+                            while ((s=inputReducer.readLine())!=null){
+                                System.out.println(s);
+                            }
                         }
                         break;
                     case "2":
@@ -98,10 +101,9 @@ public class master {
                             System.out.println("Server started. Waiting for reducer...");
                             Socket reducerSocket = serverSocket.accept(); // Accept reducer connection
                             System.out.println("Reducer connected: " + reducerSocket);
-
-                            // Create input and output streams for communication with reducer
-                            BufferedReader inputReducer = new BufferedReader(new InputStreamReader(reducerSocket.getInputStream()));
-                            System.out.println(inputReducer);
+                            // Creating input stream for communication with reducer
+                            ObjectInputStream inputStream = new ObjectInputStream(reducerSocket.getInputStream());
+                            System.out.println(inputStream.readObject());
                         }
                         break;
                     case "3":
