@@ -8,15 +8,15 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class workerNode {
-
+    // Shared memory
+    private static Map<String, Map<String, String>> memory = new HashMap<>(); 
     public static void main(String[] args) throws IOException {
+        
         ServerSocket serverSocket = new ServerSocket(12346);
         System.out.println("Worker node started. Waiting for server...");
-        
-        //Create dynamic memory for the worker
-        Map<String,Map<String,String>> memory = null; 
         
         while (true) {
             Socket serverConnection = serverSocket.accept(); // Accept connection from server
@@ -80,8 +80,36 @@ public class workerNode {
             Map<String, Map<String, String>> result = new HashMap<>();
 
             if (operation.equals("Add Accommodation")) {
-                result = data;
-                memory = data;
+                synchronized (memory) {
+                    // Merge the memory with the new data
+                    for (Map.Entry<String, Map<String, String>> entry : memory.entrySet()) {
+                        String key = entry.getKey();
+                        Map<String, String> value = entry.getValue();
+        
+                        // Check if the data contains the same key
+                        if (data.containsKey(key)) {
+                            // Merge the values for the same key
+                            Map<String, String> mergedValue = new HashMap<>(value);
+                            mergedValue.putAll(data.get(key));
+                            result.put(key, mergedValue);
+                        } else {
+                            // If data does not contain the key, just add it from memory
+                            result.put(key, value);
+                        }
+                    }
+        
+                    // Add new keys from data to result
+                    for (Map.Entry<String, Map<String, String>> entry : data.entrySet()) {
+                        String key = entry.getKey();
+                        if (!memory.containsKey(key)) {
+                            result.put(key, entry.getValue());
+                        }
+                    }
+        
+                    // Update memory with the merged result
+                    memory = result;
+                }
+                return memory;
             } 
             else if (operation.equals("Search Accommodation")) {
                 for (Map.Entry<String, Map<String, String>> entry : data.entrySet()) {
