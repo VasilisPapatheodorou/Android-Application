@@ -8,7 +8,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Stream;
 
 public class workerNode {
     // Shared memory
@@ -50,11 +49,62 @@ public class workerNode {
                 String operation = input.readLine();
                 System.out.println("Operation received: " + operation);
                 
-                // Read the map sent by the master
-                Map<String, Map<String, String>> data = (Map<String, Map<String, String>>) inputStream.readObject(); //HashMap
+                //Initialize result
+                Map<String, Map<String, String>> result = new HashMap<>();
 
-                // Process the data based on the operation
-                Map<String, Map<String, String>> result = processOperation(operation, data, memory);
+                //Depending on the operation we execute the appropriate code
+                switch (operation) {
+                    case "Add Accommodation":
+                        // Read the map sent by the master
+                        Map<String, Map<String, String>> data = (Map<String, Map<String, String>>) inputStream.readObject(); //HashMap
+
+                        synchronized (memory) {
+                            // Merge the memory with the new data
+                            for (Map.Entry<String, Map<String, String>> entry : memory.entrySet()) {
+                                String key = entry.getKey();
+                                Map<String, String> value = entry.getValue();
+                
+                                // Check if the data contains the same key
+                                if (data.containsKey(key)) {
+                                    // Merge the values for the same key
+                                    Map<String, String> mergedValue = new HashMap<>(value);
+                                    mergedValue.putAll(data.get(key));
+                                    result.put(key, mergedValue);
+                                } else {
+                                    // If data does not contain the key, just add it from memory
+                                    result.put(key, value);
+                                }
+                            }
+                
+                            // Add new keys from data to result
+                            for (Map.Entry<String, Map<String, String>> entry : data.entrySet()) {
+                                String key = entry.getKey();
+                                if (!memory.containsKey(key)) {
+                                    result.put(key, entry.getValue());
+                                }
+                            }
+                            memory.putAll(result);
+                        }
+                        break;
+
+                    case "Search Accommodation":
+                        // Read the filter sent by the master
+                        String filter = input.readLine();
+                        // Process the data based on the operation
+                        for (Map.Entry<String, Map<String, String>> entry : memory.entrySet()) {
+                            String roomName = entry.getKey(); // Get the room name
+                            Map<String, String> roomDetails = entry.getValue(); // Get the room details
+        
+                            // Check if the room is in Area3
+                            if (filter.equals(roomDetails.get("area"))) {
+                                // Add the room to the new map
+                                result.put(roomName, roomDetails);
+                            }
+                        }
+                        break;
+                    default:
+                        result=memory;
+                }
 
                 // Connect to reducer
                 Socket reducerSocket = new Socket("localhost", 12347);
@@ -75,53 +125,11 @@ public class workerNode {
         }
 
         // Method to process the operation
-        private Map<String, Map<String, String>> processOperation(String operation, Map<String, Map<String, String>> data, Map<String, Map<String, String>> memory) {
+        private Map<String, Map<String, String>> processOperation(String operation, Map<String, Map<String, String>> memory, Map<String, Map<String, String>> data) {
             // New map to store rooms in Area3
             Map<String, Map<String, String>> result = new HashMap<>();
 
-            if (operation.equals("Add Accommodation")) {
-                synchronized (memory) {
-                    // Merge the memory with the new data
-                    for (Map.Entry<String, Map<String, String>> entry : memory.entrySet()) {
-                        String key = entry.getKey();
-                        Map<String, String> value = entry.getValue();
-        
-                        // Check if the data contains the same key
-                        if (data.containsKey(key)) {
-                            // Merge the values for the same key
-                            Map<String, String> mergedValue = new HashMap<>(value);
-                            mergedValue.putAll(data.get(key));
-                            result.put(key, mergedValue);
-                        } else {
-                            // If data does not contain the key, just add it from memory
-                            result.put(key, value);
-                        }
-                    }
-        
-                    // Add new keys from data to result
-                    for (Map.Entry<String, Map<String, String>> entry : data.entrySet()) {
-                        String key = entry.getKey();
-                        if (!memory.containsKey(key)) {
-                            result.put(key, entry.getValue());
-                        }
-                    }
-                    memory.putAll(result);
-                }
-                return result;
-            } 
-            else if (operation.equals("Search Accommodation")) {
-                for (Map.Entry<String, Map<String, String>> entry : data.entrySet()) {
-                    String roomName = entry.getKey(); // Get the room name
-                    Map<String, String> roomDetails = entry.getValue(); // Get the room details
-
-                    // Check if the room is in Area3
-                    if ("Area3".equals(roomDetails.get("area"))) {
-                        // Add the room to the new map
-                        result.put(roomName, roomDetails);
-                    }
-                }
-            }
-            else if (operation.equals("Rent Accommodation")) {
+            if (operation.equals("Rent Accommodation")) {
                 
             }
             else if (operation.equals("Rate Accommodation")) {

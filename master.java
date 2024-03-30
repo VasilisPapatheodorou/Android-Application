@@ -98,10 +98,10 @@ public class master {
                     case "4":
                         // Ask for data
                         output.println("Choose filter");
-                        // Read client's data (assuming it's the file path)
+                        // Read client filter
                         String filter = input.readLine();
                         // Connect to worker node and perform "Search Accommodation" operation
-                        //connectToWorkerNodeAndPerformOperation("Search Accommodation",Data);
+                        connectToWorkerNodeAndPerformOperation("Search Accommodation",filter);
                         //building connection with reducer
                         try (ServerSocket serverSocket = new ServerSocket(12348)) {
                             System.out.println("Server started. Waiting for reducer...");
@@ -132,7 +132,7 @@ public class master {
             }
         }
 
-        // Method to connect to worker node and perform operation
+        // Method to connect to worker node and perform operation add accomodation
         private void connectToWorkerNodeAndPerformOperation(String operation,Map<String,Map<String,String>> Data) throws ClassNotFoundException {
             Map<String, Map<String,String>> result = new HashMap<>();
 
@@ -152,6 +152,37 @@ public class master {
                 // Send operation and data to worker node
                 workerOutput.println(operation);
                 outputStream.writeObject(Data);
+                
+                
+                // Close connections
+                workerInput.close();
+                workerOutput.close();
+                workerNodeSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Method to connect to worker node and perform operation search accomodation
+        private void connectToWorkerNodeAndPerformOperation(String operation, String filter) throws ClassNotFoundException{
+            Map<String, Map<String,String>> result = new HashMap<>();
+
+            try {
+                // Connect to worker node
+                Socket workerNodeSocket = new Socket("localhost", 12346); // Worker node's port
+                System.out.println("Connected to worker node");
+
+                // Creating input and output streams for communication with worker node
+                BufferedReader workerInput = new BufferedReader(new InputStreamReader(workerNodeSocket.getInputStream()));
+                PrintWriter workerOutput = new PrintWriter(workerNodeSocket.getOutputStream(), true);
+
+                // Creating input and output streams for communication
+                ObjectOutputStream outputStream = new ObjectOutputStream(workerNodeSocket.getOutputStream());
+                ObjectInputStream inputStream = new ObjectInputStream(workerNodeSocket.getInputStream());
+
+                // Send operation and data to worker node
+                workerOutput.println(operation);
+                workerOutput.println(filter);
                 
                 
                 // Close connections
