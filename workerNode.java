@@ -52,7 +52,7 @@ public class workerNode {
                 
                 // Read the map sent by the master
                 Map<String, Map<String, String>> data = (Map<String, Map<String, String>>) inputStream.readObject(); //HashMap
-                
+
                 // Process the data based on the operation
                 Map<String, Map<String, String>> result = processOperation(operation, data, memory);
 
@@ -105,11 +105,9 @@ public class workerNode {
                             result.put(key, entry.getValue());
                         }
                     }
-        
-                    // Update memory with the merged result
-                    memory = result;
+                    memory.putAll(result);
                 }
-                return memory;
+                return result;
             } 
             else if (operation.equals("Search Accommodation")) {
                 for (Map.Entry<String, Map<String, String>> entry : data.entrySet()) {
