@@ -6,35 +6,26 @@ public class client {
         try {
             Socket socket = new Socket("localhost", 12345); // Connect to localhost on port 12345
 
-            // Creating input and output streams for communication
             BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
 
-            // Reading option menu from the server
-            String serverResponse1;
-            if ((serverResponse1 = input.readLine()) != null) {
-                System.out.println(serverResponse1);
-            }
-            
-            // Reading client's choice from the console
-            BufferedReader consoleInput1 = new BufferedReader(new InputStreamReader(System.in));
-            String userInput1 = consoleInput1.readLine();
+            // Read and print option menu from the server
+            readAndPrintResponse(input);
 
-            // Sending the choice to the server
-            output.println(userInput1);
+            // Read user input from the console and send it to the server
+            String userInput1 = readUserInput();
+            sendToServer(output, userInput1);
 
-            // Reading answer
-            String serverResponse2;
-            if ((serverResponse2 = input.readLine()) != null) {
-                System.out.println(serverResponse2);
-            }
-            
-            // Reading client's choice from the console
-            BufferedReader consoleInput2 = new BufferedReader(new InputStreamReader(System.in));
-            String userInput2 = consoleInput2.readLine();
+            // Read and print server response
+            readAndPrintResponse(input);
 
-            // Sending the choice to the server
-            output.println(userInput2);
+            String userInput2 = readUserInput();
+            sendToServer(output, userInput2);
+
+            readAndPrintResponse(input);
+
+            String userInput3 = readUserInput();
+            sendToServer(output, userInput3);
 
             // Receive and print server's response
             String response;
@@ -50,5 +41,22 @@ public class client {
             e.printStackTrace();
         }
     }
+
+    private static void readAndPrintResponse(BufferedReader input) throws IOException {
+        String serverResponse;
+        if ((serverResponse = input.readLine()) != null) {
+            System.out.println(serverResponse);
+        }
+    }
+
+    private static String readUserInput() throws IOException {
+        BufferedReader consoleInput = new BufferedReader(new InputStreamReader(System.in));
+        return consoleInput.readLine();
+    }
+
+    private static void sendToServer(PrintWriter output, String userInput) {
+        output.println(userInput);
+    }
 }
+
 

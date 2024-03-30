@@ -90,16 +90,72 @@ public class workerNode {
                     case "Search Accommodation":
                         // Read the filter sent by the master
                         String filter = input.readLine();
-                        // Process the data based on the operation
-                        for (Map.Entry<String, Map<String, String>> entry : memory.entrySet()) {
-                            String roomName = entry.getKey(); // Get the room name
-                            Map<String, String> roomDetails = entry.getValue(); // Get the room details
-        
-                            // Check if the room is in Area3
-                            if (filter.equals(roomDetails.get("area"))) {
-                                // Add the room to the new map
-                                result.put(roomName, roomDetails);
-                            }
+                        String filter2 = input.readLine();
+                        // Process the data based on the filter
+                        switch (filter) {
+                            case "Area":
+
+                                for (Map.Entry<String, Map<String, String>> entry : memory.entrySet()) {
+                                    String roomName = entry.getKey(); // Get the room name
+                                    Map<String, String> roomDetails = entry.getValue(); // Get the room details
+                
+                                    // Check if the room is in Area3
+                                    if (filter2.equals(roomDetails.get("area"))) {
+                                        // Add the room to the new map
+                                        result.put(roomName, roomDetails);
+                                    }
+                                }
+                                break;
+                            case "Capacity":
+                                for (Map.Entry<String, Map<String, String>> entry : memory.entrySet()) {
+                                    String roomName = entry.getKey(); // Get the room name
+                                    Map<String, String> roomDetails = entry.getValue(); // Get the room details
+                
+                                    // Check if the room is in Area3
+                                    if (filter2.equals(roomDetails.get("noOfPersons"))) {
+                                        // Add the room to the new map
+                                        result.put(roomName, roomDetails);
+                                    }
+                                }
+                                break;
+                            case "Price":
+                                for (Map.Entry<String, Map<String, String>> entry : memory.entrySet()) {
+                                    String roomName = entry.getKey(); // Get the room name
+                                    Map<String, String> roomDetails = entry.getValue(); // Get the room details
+                
+                                    // Check if the room is in Area3
+                                    if (filter2.equals(roomDetails.get("price"))) {
+                                        // Add the room to the new map
+                                        result.put(roomName, roomDetails);
+                                    }
+                                }
+                                break;
+                            case "Stars":
+                                for (Map.Entry<String, Map<String, String>> entry : memory.entrySet()) {
+                                    String roomName = entry.getKey(); // Get the room name
+                                    Map<String, String> roomDetails = entry.getValue(); // Get the room details
+                
+                                    // Check if the room is in Area3
+                                    if (filter2.equals(roomDetails.get("stars"))) {
+                                        // Add the room to the new map
+                                        result.put(roomName, roomDetails);
+                                    }
+                                }
+                                break;
+                            case "Date":
+                                for (Map.Entry<String, Map<String, String>> entry : memory.entrySet()) {
+                                    String roomName = entry.getKey(); // Get the room name
+                                    Map<String, String> roomDetails = entry.getValue(); // Get the room details
+                
+                                    // Check if the room is in Area3
+                                    if (filter2.equals(roomDetails.get("date"))) {
+                                        // Add the room to the new map
+                                        result.put(roomName, roomDetails);
+                                    }
+                                }
+                                break;
+                            default:
+                                break;
                         }
                         break;
                     default:

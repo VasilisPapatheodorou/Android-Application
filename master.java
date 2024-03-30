@@ -97,11 +97,14 @@ public class master {
                         break;
                     case "4":
                         // Ask for data
-                        output.println("Choose filter");
+                        output.println("Choose filter:");
                         // Read client filter
                         String filter = input.readLine();
+                        // Ask for data
+                        output.println("Insert "+filter+" of choice:");
+                        String filter2 = input.readLine();
                         // Connect to worker node and perform "Search Accommodation" operation
-                        connectToWorkerNodeAndPerformOperation("Search Accommodation",filter);
+                        connectToWorkerNodeAndPerformOperation("Search Accommodation",filter,filter2);
                         //building connection with reducer
                         try (ServerSocket serverSocket = new ServerSocket(12348)) {
                             System.out.println("Server started. Waiting for reducer...");
@@ -164,7 +167,7 @@ public class master {
         }
 
         // Method to connect to worker node and perform operation search accomodation
-        private void connectToWorkerNodeAndPerformOperation(String operation, String filter) throws ClassNotFoundException{
+        private void connectToWorkerNodeAndPerformOperation(String operation, String filter, String filter2) throws ClassNotFoundException{
             Map<String, Map<String,String>> result = new HashMap<>();
 
             try {
@@ -183,6 +186,7 @@ public class master {
                 // Send operation and data to worker node
                 workerOutput.println(operation);
                 workerOutput.println(filter);
+                workerOutput.println(filter2);
                 
                 
                 // Close connections

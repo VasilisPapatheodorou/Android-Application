@@ -1,6 +1,7 @@
 {
-  "room1015": [
+  "John": [
     {
+      "room":"room1015",
       "noOfPersons": 1,
       "area": "Area5",
       "stars": 3,
@@ -8,8 +9,9 @@
       "roomImage": "C:\\Users\\johnm\\Desktop\\εργασια"
     }
   ],
-  "room1014":[
-    { 
+  "Bill":[
+    {
+      "room":"room1014",
       "noOfPersons": 1,
       "area": "Area5",
       "stars": 3,
