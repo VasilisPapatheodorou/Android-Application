@@ -60,22 +60,26 @@ public class workerNode {
 
                         synchronized (memory) {
                             // Merge the memory with the new data
+                            System.out.println(memory);
                             for (Map.Entry<String, Map<String, String>> entry : memory.entrySet()) {
                                 String key = entry.getKey();
                                 Map<String, String> value = entry.getValue();
                 
                                 // Check if the data contains the same key
                                 if (data.containsKey(key)) {
+                                    System.out.println("ok");
                                     // Merge the values for the same key
                                     Map<String, String> mergedValue = new HashMap<>(value);
                                     mergedValue.putAll(data.get(key));
+
+                                    System.out.println(mergedValue);
                                     result.put(key, mergedValue);
                                 } else {
                                     // If data does not contain the key, just add it from memory
                                     result.put(key, value);
                                 }
                             }
-                
+                            System.out.println(result);
                             // Add new keys from data to result
                             for (Map.Entry<String, Map<String, String>> entry : data.entrySet()) {
                                 String key = entry.getKey();
@@ -83,6 +87,7 @@ public class workerNode {
                                     result.put(key, entry.getValue());
                                 }
                             }
+                            System.out.println(result);
                             memory.putAll(result);
                         }
                         break;

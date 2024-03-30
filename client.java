@@ -9,8 +9,15 @@ public class client {
             BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
 
-            // Read and print option menu from the server
-            readAndPrintResponse(input);
+            // Send the option menu to the client
+            System.out.println("Welcome to Booking App!");
+            System.out.println("Choose action by number");
+            System.out.println("1. Add Accommodation");
+            System.out.println("2. Rent accomodation");
+            System.out.println("3. Rate accomodation");
+            System.out.println("4. Search Accommodation");
+            System.out.println("5. Show reservations");
+            System.out.println("6. Exit");
 
             // Read user input from the console and send it to the server
             String userInput1 = readUserInput();

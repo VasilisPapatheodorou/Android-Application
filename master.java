@@ -57,15 +57,6 @@ public class master {
                 BufferedReader input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 PrintWriter output = new PrintWriter(clientSocket.getOutputStream(), true);
 
-                // Send the option menu to the client
-                output.println("Welcome to Booking App!");
-                //output.println("1. Add Accommodation");
-                //output.println("2. Rent accomodation");
-                //output.println("3. Rate accomodation");
-                //output.println("4. Search Accommodation");
-                //output.println("5. Show reservations");
-                //output.println("6. Exit");
-
                 // Read client's choice
                 String clientChoice = input.readLine();
 
@@ -80,14 +71,8 @@ public class master {
                         Map<String, Map<String,String>> Data = parseJsonFromFile(jsonDataFilePath);
                         // Connect to worker node and perform "Add Accommodation" operation
                         connectToWorkerNodeAndPerformOperation("Add Accommodation",Data);
-                        try (ServerSocket serverSocket = new ServerSocket(12348)) {
-                            System.out.println("Server started. Waiting for reducer...");
-                            Socket reducerSocket = serverSocket.accept(); // Accept reducer connection
-                            System.out.println("Reducer connected: " + reducerSocket);
-                            // Creating input stream for communication with reducer
-                            ObjectInputStream inputStream = new ObjectInputStream(reducerSocket.getInputStream());
-                            System.out.println(inputStream.readObject());
-                        }
+                        //build connection with reducer
+                        connectWithReducer();
                         break;
                     case "2":
                         output.println("Rent accomodation");
@@ -106,14 +91,7 @@ public class master {
                         // Connect to worker node and perform "Search Accommodation" operation
                         connectToWorkerNodeAndPerformOperation("Search Accommodation",filter,filter2);
                         //building connection with reducer
-                        try (ServerSocket serverSocket = new ServerSocket(12348)) {
-                            System.out.println("Server started. Waiting for reducer...");
-                            Socket reducerSocket = serverSocket.accept(); // Accept reducer connection
-                            System.out.println("Reducer connected: " + reducerSocket);
-                            // Creating input stream for communication with reducer
-                            ObjectInputStream inputStream = new ObjectInputStream(reducerSocket.getInputStream());
-                            System.out.println(inputStream.readObject());
-                        }
+                        connectWithReducer();
                         break;
                     case "5":
                         output.println("Show reservations");
@@ -132,6 +110,17 @@ public class master {
                 clientSocket.close();
             } catch (IOException | ParseException | ClassNotFoundException e) {
                 e.printStackTrace();
+            }
+        }
+
+        private void connectWithReducer() throws IOException, ClassNotFoundException{
+            try (ServerSocket serverSocket = new ServerSocket(12348)) {
+                System.out.println("Server started. Waiting for reducer...");
+                Socket reducerSocket = serverSocket.accept(); // Accept reducer connection
+                System.out.println("Reducer connected: " + reducerSocket);
+                // Creating input stream for communication with reducer
+                ObjectInputStream inputStream = new ObjectInputStream(reducerSocket.getInputStream());
+                System.out.println(inputStream.readObject());
             }
         }
 
@@ -215,14 +204,15 @@ public class master {
         
         // Process JSON array and extract attributes
         Map<String, Map<String, String>> result = new HashMap<>();
-        for (Object roomKey : jsonObject.keySet()) {
-            JSONArray roomArray = (JSONArray) jsonObject.get(roomKey); // Get the array of room details
+        for (Object ownerKey : jsonObject.keySet()) {
+            JSONArray roomArray = (JSONArray) jsonObject.get(ownerKey); // Get the array of room details
 
             // Assuming each room has only one set of details, you can get the first element of the array
             JSONObject roomObject = (JSONObject) roomArray.get(0);
 
             // Extract individual attributes
-            String roomName = (String) roomKey;
+            String owner = (String) ownerKey;
+            String room = (String) roomObject.get("room");
             Long noOfPersons = (Long) roomObject.get("noOfPersons");
             String area = (String) roomObject.get("area");
             Long stars = (Long) roomObject.get("stars");
@@ -231,14 +221,15 @@ public class master {
 
             // Put attributes into the map
             Map<String, String> attributesMap = new HashMap<>();
+            attributesMap.put("room", String.valueOf(room));
             attributesMap.put("noOfPersons", String.valueOf(noOfPersons));
             attributesMap.put("area", area);
             attributesMap.put("stars", String.valueOf(stars));
             attributesMap.put("noOfReviews", String.valueOf(noOfReviews));
             attributesMap.put("roomImage", roomImage);
 
-            // Add the attributes map to the result with roomName as key
-            result.put(roomName, attributesMap);
+            // Add the attributes map to the result with owner as key
+            result.put(owner, attributesMap);
         }    
         return result;
     }   
