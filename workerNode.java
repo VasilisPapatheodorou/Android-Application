@@ -10,12 +10,11 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class workerNode {
     // Shared memory
-    private static Map<String, Map<String, String>> memory = new HashMap<>(); 
+    private static Map<String, ArrayList<Map<String,String>>> memory = new HashMap<>(); 
     public static void main(String[] args) throws IOException {
         
         @SuppressWarnings("resource")
@@ -35,9 +34,9 @@ public class workerNode {
     // ClientHandler class to handle each client connection
     private static class ClientHandler implements Runnable {
         private final Socket serverConnection;
-        private Map<String, Map<String, String>> memory;
+        private Map<String, ArrayList<Map<String,String>>> memory;
 
-        public ClientHandler(Socket serverConnection, Map<String, Map<String, String>> memory) {
+        public ClientHandler(Socket serverConnection, Map<String, ArrayList<Map<String,String>>> memory) {
             this.serverConnection = serverConnection;
             this.memory = memory;
         }
@@ -55,45 +54,50 @@ public class workerNode {
                 System.out.println("Operation received: " + operation);
                 
                 //Initialize result
-                Map<String, Map<String, String>> result = new HashMap<>();
+                Map<String, ArrayList<Map<String,String>>> result = new HashMap<>();
 
                 //Depending on the operation we execute the appropriate code
                 switch (operation) {
                     case "Add Accommodation":
                         // Read the map sent by the master
                         @SuppressWarnings("unchecked")
-                        Map<String, Map<String, String>> data = (Map<String, Map<String, String>>) inputStream.readObject(); //HashMap
-
+                        Map<String, ArrayList<Map<String,String>>> data = (Map<String, ArrayList<Map<String,String>>>) inputStream.readObject(); //HashMap
                         synchronized (memory) {
-                            // Merge the memory with the new data
-                            //System.out.println(memory);
-                            for (Map.Entry<String, Map<String, String>> entry : memory.entrySet()) {
+                            // Iterate over the entries of the data map
+                            for (Map.Entry<String, ArrayList<Map<String,String>>> entry : data.entrySet()) {
                                 String key = entry.getKey();
-                                Map<String, String> value = entry.getValue();
-                                System.out.println("Key "+key+" value "+value);
-                
-                                // Check if the data contains the same key
-                                if (data.containsKey(key)) {
-                                    // Merge the values for the same key
-                                    Map<String, String> mergedValue = new HashMap<>(value);
-                                    System.out.println("old "+ mergedValue+" new "+data.get(key));
-                                    mergedValue.putAll(data.get(key));
-                                    //System.out.println(mergedValue);
-                                    result.put(key, mergedValue);
-                                } else {
-                                    // If data does not contain the key, just add it from memory
-                                    result.put(key, value);
+                                
+                                
+                                ArrayList<Map<String,String>> newDataList = entry.getValue();
+                                
+                                ArrayList<Map<String,String>> mergedList = new ArrayList<>();
+                    
+                                // Iterate over the list of room details in the data
+                                for (Map<String,String> newData : newDataList) {
+                                    boolean found = false;
+                    
+                                    // Iterate over the existing memory to check if the room detail already exists
+                                    for (ArrayList<Map<String,String>> existingDataList : memory.values()) {
+                                        for (Map<String,String> existingData : existingDataList) {
+                                            if (existingData.equals(newData)) {
+                                                // If the room detail already exists, update it
+                                                mergedList.add(existingData);
+                                                found = true;
+                                                break;
+                                            }
+                                        }
+                                        if (found) break;
+                                    }
+                    
+                                    // If the room detail doesn't exist, add it
+                                    if (!found) {
+                                        mergedList.add(newData);
+                                    }
                                 }
+                    
+                                // Add the merged list to the result
+                                result.put(key, mergedList);
                             }
-                            //System.out.println(result);
-                            // Add new keys from data to result
-                            for (Map.Entry<String, Map<String, String>> entry : data.entrySet()) {
-                                String key = entry.getKey();
-                                if (!memory.containsKey(key)) {
-                                    result.put(key, entry.getValue());
-                                }
-                            }
-                            //System.out.println(result);
                             memory.putAll(result);
                         }
                         break;
@@ -105,63 +109,112 @@ public class workerNode {
                         // Process the data based on the filter
                         switch (filter) {
                             case "area":
-
-                                for (Map.Entry<String, Map<String, String>> entry : memory.entrySet()) {
+                                for (Map.Entry<String, ArrayList<Map<String,String>>> entry : memory.entrySet()) {
+                                    
                                     String roomName = entry.getKey(); // Get the room name
-                                    Map<String, String> roomDetails = entry.getValue(); // Get the room details
-                
+                                    ArrayList<Map<String,String>> roomDetails = entry.getValue(); // Get the room details
+                                    // List to store filtered items for the current room
+                                    ArrayList<Map<String,String>> filteredItems = new ArrayList<>();
                                     // Check 
-                                    if (filter2.equals(roomDetails.get("area"))) {
-                                        // Add the room to the new map
-                                        result.put(roomName, roomDetails);
+                                    for(Map<String,String> item : roomDetails){
+                                        if (filter2.equals(item.get("area"))) {
+                                            System.out.println(item);
+                                            filteredItems.add(item);
+                                        }
+                                        
+                                    }
+                                    // Check if any items were filtered for the current room
+                                    if (!filteredItems.isEmpty()) {
+                                        // Add the filtered items to the result map with the roomName as key
+                                        result.put(roomName, filteredItems);
                                     }
                                 }
                                 break;
                             case "capacity":
-                                for (Map.Entry<String, Map<String, String>> entry : memory.entrySet()) {
+                                for (Map.Entry<String, ArrayList<Map<String,String>>> entry : memory.entrySet()) {
+                                        
                                     String roomName = entry.getKey(); // Get the room name
-                                    Map<String, String> roomDetails = entry.getValue(); // Get the room details
-                
+                                    ArrayList<Map<String,String>> roomDetails = entry.getValue(); // Get the room details
+                                    // List to store filtered items for the current room
+                                    ArrayList<Map<String,String>> filteredItems = new ArrayList<>();
                                     // Check 
-                                    if (filter2.equals(roomDetails.get("noOfPersons"))) {
-                                        // Add the room to the new map
-                                        result.put(roomName, roomDetails);
+                                    for(Map<String,String> item : roomDetails){
+                                        if (filter2.equals(item.get("noOfPersons"))) {
+                                            System.out.println(item);
+                                            filteredItems.add(item);
+                                        }
+                                        
+                                    }
+                                    // Check if any items were filtered for the current room
+                                    if (!filteredItems.isEmpty()) {
+                                        // Add the filtered items to the result map with the roomName as key
+                                        result.put(roomName, filteredItems);
                                     }
                                 }
                                 break;
                             case "price":
-                                for (Map.Entry<String, Map<String, String>> entry : memory.entrySet()) {
+                                for (Map.Entry<String, ArrayList<Map<String,String>>> entry : memory.entrySet()) {
+                                        
                                     String roomName = entry.getKey(); // Get the room name
-                                    Map<String, String> roomDetails = entry.getValue(); // Get the room details
-                
+                                    ArrayList<Map<String,String>> roomDetails = entry.getValue(); // Get the room details
+                                    // List to store filtered items for the current room
+                                    ArrayList<Map<String,String>> filteredItems = new ArrayList<>();
                                     // Check 
-                                    if (filter2.equals(roomDetails.get("price"))) {
-                                        // Add the room to the new map
-                                        result.put(roomName, roomDetails);
+                                    for(Map<String,String> item : roomDetails){
+                                        if (filter2.equals(item.get("price"))) {
+                                            System.out.println(item);
+                                            filteredItems.add(item);
+                                        }
+                                        
+                                    }
+                                    // Check if any items were filtered for the current room
+                                    if (!filteredItems.isEmpty()) {
+                                        // Add the filtered items to the result map with the roomName as key
+                                        result.put(roomName, filteredItems);
                                     }
                                 }
                                 break;
                             case "stars":
-                                for (Map.Entry<String, Map<String, String>> entry : memory.entrySet()) {
+                                for (Map.Entry<String, ArrayList<Map<String,String>>> entry : memory.entrySet()) {
+                                        
                                     String roomName = entry.getKey(); // Get the room name
-                                    Map<String, String> roomDetails = entry.getValue(); // Get the room details
-                
+                                    ArrayList<Map<String,String>> roomDetails = entry.getValue(); // Get the room details
+                                    // List to store filtered items for the current room
+                                    ArrayList<Map<String,String>> filteredItems = new ArrayList<>();
                                     // Check 
-                                    if (filter2.equals(roomDetails.get("stars"))) {
-                                        // Add the room to the new map
-                                        result.put(roomName, roomDetails);
+                                    for(Map<String,String> item : roomDetails){
+                                        if (filter2.equals(item.get("stars"))) {
+                                            System.out.println(item);
+                                            filteredItems.add(item);
+                                        }
+                                        
+                                    }
+                                    // Check if any items were filtered for the current room
+                                    if (!filteredItems.isEmpty()) {
+                                        // Add the filtered items to the result map with the roomName as key
+                                        result.put(roomName, filteredItems);
                                     }
                                 }
                                 break;
                             case "date":
-                                for (Map.Entry<String, Map<String, String>> entry : memory.entrySet()) {
+                                for (Map.Entry<String, ArrayList<Map<String,String>>> entry : memory.entrySet()) {
+                                        
                                     String roomName = entry.getKey(); // Get the room name
-                                    Map<String, String> roomDetails = entry.getValue(); // Get the room details
-                
+                                    ArrayList<Map<String,String>> roomDetails = entry.getValue(); // Get the room details
+                                    // List to store filtered items for the current room
+                                    ArrayList<Map<String,String>> filteredItems = new ArrayList<>();
                                     // Check 
-                                    if (filter2.equals(roomDetails.get("date"))) {
-                                        // Add the room to the new map
-                                        result.put(roomName, roomDetails);
+                                    for(Map<String,String> item : roomDetails){
+                                        if (filter2.equals(item.get("date"))) {
+                                            System.out.println(item);
+                                            filteredItems.add(item);
+                                        }
+                                        
+                                    }
+                                    // Check if any items were filtered for the current room
+                                    if (!filteredItems.isEmpty()) {
+                                        // Add the filtered items to the result map with the roomName as key
+                                        result.put(roomName, filteredItems);
                                     }
                                 }
                                 break;
@@ -190,9 +243,10 @@ public class workerNode {
                         
                         // Adding booking items to each room
                         synchronized (memory) {
-                            for (Map.Entry<String, Map<String, String>> entry : memory.entrySet()) {
+                            for (Map.Entry<String, ArrayList<Map<String, String>>> entry : memory.entrySet()) {
+                                for(Map<String, String> item : entry.getValue()){}
                                 System.out.println(entry.getValue());
-                                System.out.println(entry.getValue().get("bookings"));
+                                //System.out.println(entry.getValue().get("bookings"));
                             }
                         }
                         

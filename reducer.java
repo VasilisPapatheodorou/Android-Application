@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Map;
+import java.util.ArrayList;
 
 public class reducer {
     public static void main(String[] args) throws InterruptedException, ClassNotFoundException {
@@ -27,7 +28,7 @@ public class reducer {
 
                     // Read the map sent by the worker
                     @SuppressWarnings("unchecked")
-                    Map<String, Map<String,String>> resultFromWorker = (Map<String, Map<String,String>>) inputStream.readObject(); //HashMap
+                    Map<String, ArrayList<Map<String,String>>> resultFromWorker = (Map<String, ArrayList<Map<String,String>>>) inputStream.readObject(); //HashMap
                     
                     // Connect to master
                     Socket MasterSocket = new Socket("localhost", 12348);

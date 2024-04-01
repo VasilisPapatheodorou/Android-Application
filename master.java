@@ -2,7 +2,6 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import org.json.simple.JSONArray;
@@ -45,6 +44,7 @@ public class master {
     // ClientHandler class to handle each client connection
     private static class ClientHandler implements Runnable {
         private final Socket clientSocket;
+        @SuppressWarnings("unused")
         private Integer numOfWorkers;
 
         public ClientHandler(Socket clientSocket, Integer numOfWorkers) {
@@ -70,7 +70,8 @@ public class master {
                         // Read client's data (assuming it's the file path)
                         String jsonDataFilePath = input.readLine();
                         // Parse JSON data from the file
-                        Map<String, Map<String,String>> Data = parseJsonFromFile(jsonDataFilePath);
+                        
+                        Map<String, ArrayList<Map<String,String>>> Data = parseJsonFromFile(jsonDataFilePath);
                         // Connect to worker node and perform "Add Accommodation" operation
                         insertAccomodation("Add Accommodation",Data);
                         //build connection with reducer
@@ -140,7 +141,7 @@ public class master {
         }
 
         // Method to connect to worker node and perform operation add accomodation
-        private void insertAccomodation(String operation,Map<String,Map<String,String>> Data) throws ClassNotFoundException {
+        private void insertAccomodation(String operation,Map<String, ArrayList<Map<String,String>>> Data) throws ClassNotFoundException {
 
             try {
                 // Connect to worker node
@@ -153,6 +154,7 @@ public class master {
 
                 // Creating input and output streams for communication
                 ObjectOutputStream outputStream = new ObjectOutputStream(workerNodeSocket.getOutputStream());
+                @SuppressWarnings("unused")
                 ObjectInputStream inputStream = new ObjectInputStream(workerNodeSocket.getInputStream());
 
                 // Send operation and data to worker node
@@ -170,6 +172,7 @@ public class master {
         }
 
         // Method to connect to worker node and perform operation search/rent accomodation
+        @SuppressWarnings("unused")
         private void searchAccomodation(String operation, String filter, String filter2) throws ClassNotFoundException{
 
             try {
@@ -200,6 +203,7 @@ public class master {
             }
         }
         
+        @SuppressWarnings("unused")
         private void rentAccomodation(String operation, String room, String beginning,String ending) throws ClassNotFoundException{
 
             try {
@@ -231,7 +235,8 @@ public class master {
         }
     }
 
-    private static Map<String, Map<String, String>> parseJsonFromFile(String filePath) throws IOException, ParseException {
+    @SuppressWarnings("rawtypes")
+    private static Map<String, ArrayList<Map<String,String>>> parseJsonFromFile(String filePath) throws IOException, ParseException {
         // Read the content of the JSON file
         StringBuilder jsonContent = new StringBuilder();
         try (BufferedReader fileReader = new BufferedReader(new FileReader(filePath))) {
@@ -246,41 +251,45 @@ public class master {
         JSONObject jsonObject = (JSONObject) parser.parse(jsonContent.toString()); // Parse as JSONObject, not JSONArray
         
         // Process JSON array and extract attributes
-        Map<String, Map<String, String>> result = new HashMap<>();
+        Map<String, ArrayList<Map<String, String>>> result = new HashMap<>();
         for (Object ownerKey : jsonObject.keySet()) {
-            
+            ArrayList<Map<String,String>> owner_rooms= new ArrayList<>();
             JSONArray roomArray = (JSONArray) jsonObject.get(ownerKey); // Get the array of room details
 
             // Assuming each room has only one set of details, you can get the first element of the array
-            /*for (Integer i=0; i<roomArray.size(); i++ ){
-                System.out.println(roomArray.get(i));
-            }*/
-            JSONObject roomObject = (JSONObject) roomArray.get(0);
+            for (Integer i=0; i<roomArray.size(); i++ ){
+                JSONObject roomObject = (JSONObject) roomArray.get(i);
 
-            // Extract individual attributes
-            String owner = (String) ownerKey;
-            String room = (String) roomObject.get("room");
-            Long noOfPersons = (Long) roomObject.get("noOfPersons");
-            String area = (String) roomObject.get("area");
-            Long stars = (Long) roomObject.get("stars");
-            Long noOfReviews = (Long) roomObject.get("noOfReviews");
-            ArrayList bookings = (ArrayList) roomObject.get("bookings");
-            Long price = (Long) roomObject.get("price");
-            String roomImage = (String) roomObject.get("roomImage");
+                // Extract individual attributes
+                
+                String room = (String) roomObject.get("room");
+                Long noOfPersons = (Long) roomObject.get("noOfPersons");
+                String area = (String) roomObject.get("area");
+                Long stars = (Long) roomObject.get("stars");
+                Long noOfReviews = (Long) roomObject.get("noOfReviews");
+                ArrayList bookings = (ArrayList) roomObject.get("bookings");
+                Long price = (Long) roomObject.get("price");
+                String roomImage = (String) roomObject.get("roomImage");
 
-            // Put attributes into the map
-            Map<String, String> attributesMap = new HashMap<>();
-            attributesMap.put("room", String.valueOf(room));
-            attributesMap.put("noOfPersons", String.valueOf(noOfPersons));
-            attributesMap.put("area", area);
-            attributesMap.put("stars", String.valueOf(stars));
-            attributesMap.put("noOfReviews", String.valueOf(noOfReviews));
-            attributesMap.put("bookings", String.valueOf(bookings));
-            attributesMap.put("price", String.valueOf(price));
-            attributesMap.put("roomImage", roomImage);
+                // Put attributes into the map
+                Map<String, String> attributesMap = new HashMap<>();
+                attributesMap.put("room", String.valueOf(room));
+                attributesMap.put("noOfPersons", String.valueOf(noOfPersons));
+                attributesMap.put("area", area);
+                attributesMap.put("stars", String.valueOf(stars));
+                attributesMap.put("noOfReviews", String.valueOf(noOfReviews));
+                attributesMap.put("bookings", String.valueOf(bookings));
+                attributesMap.put("price", String.valueOf(price));
+                attributesMap.put("roomImage", roomImage);
+                owner_rooms.add(attributesMap);
+
+            }
+            result.put((String)ownerKey, owner_rooms);
+
+
 
             // Add the attributes map to the result with owner as key
-            result.put(owner, attributesMap);
+
         }    
         return result;
     }   
