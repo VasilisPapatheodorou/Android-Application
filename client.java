@@ -20,6 +20,7 @@ public class client {
             System.out.println("6. Exit");
 
             // Read user input from the console and send it to the server
+            
             String userInput1 = readUserInput();
             sendToServer(output, userInput1);
 
@@ -33,6 +34,11 @@ public class client {
 
             String userInput3 = readUserInput();
             sendToServer(output, userInput3);
+
+            readAndPrintResponse(input);
+
+            String userInput4 = readUserInput();
+            sendToServer(output, userInput4);
 
             // Receive and print server's response
             String response;

@@ -2,10 +2,11 @@
   "John": [
     {
       "room":"room1015",
-      "noOfPersons": 1,
+      "noOfPersons": 10,
       "area": "Area5",
       "stars": 3,
       "noOfReviews": 65,
+      "price":50,
       "roomImage": "C:\\Users\\johnm\\Desktop\\εργασια"
     }
   ],
@@ -13,9 +14,10 @@
     {
       "room":"room1014",
       "noOfPersons": 1,
-      "area": "Area5",
-      "stars": 3,
-      "noOfReviews": 65,
+      "area": "Area1",
+      "stars": 2,
+      "noOfReviews": 60,
+      "price":60,
       "roomImage": "C:\\Users\\johnm\\Desktop\\εργασια"
     }
   ]

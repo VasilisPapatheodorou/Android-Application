@@ -26,6 +26,7 @@ public class reducer {
                     ObjectInputStream inputStream = new ObjectInputStream(workerSocket.getInputStream());
 
                     // Read the map sent by the worker
+                    @SuppressWarnings("unchecked")
                     Map<String, Map<String,String>> resultFromWorker = (Map<String, Map<String,String>>) inputStream.readObject(); //HashMap
                     
                     // Connect to master

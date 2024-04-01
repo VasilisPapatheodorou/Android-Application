@@ -2,10 +2,22 @@
   "Bill": [
     {
       "room":"room1012",
-      "noOfPersons": 1,
-      "area": "Area5",
+      "noOfPersons": 4,
+      "area": "Area4",
       "stars": 3,
-      "noOfReviews": 65,
+      "noOfReviews": 66,
+      "bookings":[],
+      "price":70,
+      "roomImage": "C:\\Users\\johnm\\Desktop\\εργασια"
+    },
+    {
+      "room":"room1014",
+      "noOfPersons": 10,
+      "area": "Area1",
+      "stars": 4,
+      "noOfReviews": 76,
+      "bookings":[],
+      "price":100,
       "roomImage": "C:\\Users\\johnm\\Desktop\\εργασια"
     }
   ],
@@ -14,8 +26,10 @@
       "room":"room1013", 
       "noOfPersons": 1,
       "area": "Area5",
-      "stars": 3,
+      "stars": 2,
       "noOfReviews": 65,
+      "bookings":[],
+      "price":80,
       "roomImage": "C:\\Users\\johnm\\Desktop\\εργασια"
     }
   ]

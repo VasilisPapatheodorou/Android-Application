@@ -1,6 +1,8 @@
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import org.json.simple.JSONArray;
@@ -70,12 +72,25 @@ public class master {
                         // Parse JSON data from the file
                         Map<String, Map<String,String>> Data = parseJsonFromFile(jsonDataFilePath);
                         // Connect to worker node and perform "Add Accommodation" operation
-                        connectToWorkerNodeAndPerformOperation("Add Accommodation",Data);
+                        insertAccomodation("Add Accommodation",Data);
                         //build connection with reducer
                         connectWithReducer();
                         break;
                     case "2":
-                        output.println("Rent accomodation");
+
+                        // Ask for room to rent
+                        output.println("Choose room");
+                        // Read client's choice
+                        String choice = input.readLine();
+                        // Ask for date
+                        output.println("Insert beginning of rent");
+                        String beginning = input.readLine();
+                        output.println("Insert ending of rent");
+                        String ending = input.readLine();
+                        // Connect to worker node and perform "Search Accommodation" operation
+                        rentAccomodation("Rent Accomodation",choice,beginning,ending);
+                        //building connection with reducer
+                        connectWithReducer();
                         break;
                     case "3":
                         output.println("Rate accomodation");
@@ -89,7 +104,7 @@ public class master {
                         output.println("Insert "+filter+" of choice:");
                         String filter2 = input.readLine();
                         // Connect to worker node and perform "Search Accommodation" operation
-                        connectToWorkerNodeAndPerformOperation("Search Accommodation",filter,filter2);
+                        searchAccomodation("Search Accommodation",filter,filter2);
                         //building connection with reducer
                         connectWithReducer();
                         break;
@@ -125,8 +140,7 @@ public class master {
         }
 
         // Method to connect to worker node and perform operation add accomodation
-        private void connectToWorkerNodeAndPerformOperation(String operation,Map<String,Map<String,String>> Data) throws ClassNotFoundException {
-            Map<String, Map<String,String>> result = new HashMap<>();
+        private void insertAccomodation(String operation,Map<String,Map<String,String>> Data) throws ClassNotFoundException {
 
             try {
                 // Connect to worker node
@@ -155,9 +169,8 @@ public class master {
             }
         }
 
-        // Method to connect to worker node and perform operation search accomodation
-        private void connectToWorkerNodeAndPerformOperation(String operation, String filter, String filter2) throws ClassNotFoundException{
-            Map<String, Map<String,String>> result = new HashMap<>();
+        // Method to connect to worker node and perform operation search/rent accomodation
+        private void searchAccomodation(String operation, String filter, String filter2) throws ClassNotFoundException{
 
             try {
                 // Connect to worker node
@@ -186,6 +199,36 @@ public class master {
                 e.printStackTrace();
             }
         }
+        
+        private void rentAccomodation(String operation, String room, String beginning,String ending) throws ClassNotFoundException{
+
+            try {
+                // Connect to worker node
+                Socket workerNodeSocket = new Socket("localhost", 12346); // Worker node's port
+                System.out.println("Connected to worker node");
+
+                // Creating input and output streams for communication with worker node
+                BufferedReader workerInput = new BufferedReader(new InputStreamReader(workerNodeSocket.getInputStream()));
+                PrintWriter workerOutput = new PrintWriter(workerNodeSocket.getOutputStream(), true);
+
+                // Creating input and output streams for communication
+                ObjectOutputStream outputStream = new ObjectOutputStream(workerNodeSocket.getOutputStream());
+                ObjectInputStream inputStream = new ObjectInputStream(workerNodeSocket.getInputStream());
+
+                // Send operation and data to worker node
+                workerOutput.println(operation);
+                workerOutput.println(room);
+                workerOutput.println(beginning);
+                workerOutput.println(ending);
+                
+                // Close connections
+                workerInput.close();
+                workerOutput.close();
+                workerNodeSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private static Map<String, Map<String, String>> parseJsonFromFile(String filePath) throws IOException, ParseException {
@@ -205,9 +248,13 @@ public class master {
         // Process JSON array and extract attributes
         Map<String, Map<String, String>> result = new HashMap<>();
         for (Object ownerKey : jsonObject.keySet()) {
+            
             JSONArray roomArray = (JSONArray) jsonObject.get(ownerKey); // Get the array of room details
 
             // Assuming each room has only one set of details, you can get the first element of the array
+            /*for (Integer i=0; i<roomArray.size(); i++ ){
+                System.out.println(roomArray.get(i));
+            }*/
             JSONObject roomObject = (JSONObject) roomArray.get(0);
 
             // Extract individual attributes
@@ -217,6 +264,8 @@ public class master {
             String area = (String) roomObject.get("area");
             Long stars = (Long) roomObject.get("stars");
             Long noOfReviews = (Long) roomObject.get("noOfReviews");
+            ArrayList bookings = (ArrayList) roomObject.get("bookings");
+            Long price = (Long) roomObject.get("price");
             String roomImage = (String) roomObject.get("roomImage");
 
             // Put attributes into the map
@@ -226,6 +275,8 @@ public class master {
             attributesMap.put("area", area);
             attributesMap.put("stars", String.valueOf(stars));
             attributesMap.put("noOfReviews", String.valueOf(noOfReviews));
+            attributesMap.put("bookings", String.valueOf(bookings));
+            attributesMap.put("price", String.valueOf(price));
             attributesMap.put("roomImage", roomImage);
 
             // Add the attributes map to the result with owner as key

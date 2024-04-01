@@ -6,7 +6,11 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class workerNode {
@@ -14,6 +18,7 @@ public class workerNode {
     private static Map<String, Map<String, String>> memory = new HashMap<>(); 
     public static void main(String[] args) throws IOException {
         
+        @SuppressWarnings("resource")
         ServerSocket serverSocket = new ServerSocket(12346);
         System.out.println("Worker node started. Waiting for server...");
         
@@ -56,30 +61,31 @@ public class workerNode {
                 switch (operation) {
                     case "Add Accommodation":
                         // Read the map sent by the master
+                        @SuppressWarnings("unchecked")
                         Map<String, Map<String, String>> data = (Map<String, Map<String, String>>) inputStream.readObject(); //HashMap
 
                         synchronized (memory) {
                             // Merge the memory with the new data
-                            System.out.println(memory);
+                            //System.out.println(memory);
                             for (Map.Entry<String, Map<String, String>> entry : memory.entrySet()) {
                                 String key = entry.getKey();
                                 Map<String, String> value = entry.getValue();
+                                System.out.println("Key "+key+" value "+value);
                 
                                 // Check if the data contains the same key
                                 if (data.containsKey(key)) {
-                                    System.out.println("ok");
                                     // Merge the values for the same key
                                     Map<String, String> mergedValue = new HashMap<>(value);
+                                    System.out.println("old "+ mergedValue+" new "+data.get(key));
                                     mergedValue.putAll(data.get(key));
-
-                                    System.out.println(mergedValue);
+                                    //System.out.println(mergedValue);
                                     result.put(key, mergedValue);
                                 } else {
                                     // If data does not contain the key, just add it from memory
                                     result.put(key, value);
                                 }
                             }
-                            System.out.println(result);
+                            //System.out.println(result);
                             // Add new keys from data to result
                             for (Map.Entry<String, Map<String, String>> entry : data.entrySet()) {
                                 String key = entry.getKey();
@@ -87,7 +93,7 @@ public class workerNode {
                                     result.put(key, entry.getValue());
                                 }
                             }
-                            System.out.println(result);
+                            //System.out.println(result);
                             memory.putAll(result);
                         }
                         break;
@@ -98,61 +104,61 @@ public class workerNode {
                         String filter2 = input.readLine();
                         // Process the data based on the filter
                         switch (filter) {
-                            case "Area":
+                            case "area":
 
                                 for (Map.Entry<String, Map<String, String>> entry : memory.entrySet()) {
                                     String roomName = entry.getKey(); // Get the room name
                                     Map<String, String> roomDetails = entry.getValue(); // Get the room details
                 
-                                    // Check if the room is in Area3
+                                    // Check 
                                     if (filter2.equals(roomDetails.get("area"))) {
                                         // Add the room to the new map
                                         result.put(roomName, roomDetails);
                                     }
                                 }
                                 break;
-                            case "Capacity":
+                            case "capacity":
                                 for (Map.Entry<String, Map<String, String>> entry : memory.entrySet()) {
                                     String roomName = entry.getKey(); // Get the room name
                                     Map<String, String> roomDetails = entry.getValue(); // Get the room details
                 
-                                    // Check if the room is in Area3
+                                    // Check 
                                     if (filter2.equals(roomDetails.get("noOfPersons"))) {
                                         // Add the room to the new map
                                         result.put(roomName, roomDetails);
                                     }
                                 }
                                 break;
-                            case "Price":
+                            case "price":
                                 for (Map.Entry<String, Map<String, String>> entry : memory.entrySet()) {
                                     String roomName = entry.getKey(); // Get the room name
                                     Map<String, String> roomDetails = entry.getValue(); // Get the room details
                 
-                                    // Check if the room is in Area3
+                                    // Check 
                                     if (filter2.equals(roomDetails.get("price"))) {
                                         // Add the room to the new map
                                         result.put(roomName, roomDetails);
                                     }
                                 }
                                 break;
-                            case "Stars":
+                            case "stars":
                                 for (Map.Entry<String, Map<String, String>> entry : memory.entrySet()) {
                                     String roomName = entry.getKey(); // Get the room name
                                     Map<String, String> roomDetails = entry.getValue(); // Get the room details
                 
-                                    // Check if the room is in Area3
+                                    // Check 
                                     if (filter2.equals(roomDetails.get("stars"))) {
                                         // Add the room to the new map
                                         result.put(roomName, roomDetails);
                                     }
                                 }
                                 break;
-                            case "Date":
+                            case "date":
                                 for (Map.Entry<String, Map<String, String>> entry : memory.entrySet()) {
                                     String roomName = entry.getKey(); // Get the room name
                                     Map<String, String> roomDetails = entry.getValue(); // Get the room details
                 
-                                    // Check if the room is in Area3
+                                    // Check 
                                     if (filter2.equals(roomDetails.get("date"))) {
                                         // Add the room to the new map
                                         result.put(roomName, roomDetails);
@@ -163,6 +169,37 @@ public class workerNode {
                                 break;
                         }
                         break;
+                    case "Rent Accomodation":
+                        // Read the filter sent by the master
+                        String roomChoice = input.readLine();
+                        String startDate = input.readLine();
+                        
+                        //Format String Date into a LocalDate Object
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                        LocalDate start = LocalDate.parse(startDate, formatter);
+                        System.out.println("Original String: " + startDate);
+                        System.out.println("Parsed LocalDate: " + start);
+                        
+                        String endDate = input.readLine();
+                        
+                        //Format String Date into a LocalDate Object
+                        LocalDate end = LocalDate.parse(endDate, formatter);
+                        System.out.println("Original String: " + startDate);
+                        System.out.println("Parsed LocalDate: " + end);
+                        System.out.println("ok");
+                        
+                        // Adding booking items to each room
+                        synchronized (memory) {
+                            for (Map.Entry<String, Map<String, String>> entry : memory.entrySet()) {
+                                System.out.println(entry.getValue());
+                                System.out.println(entry.getValue().get("bookings"));
+                            }
+                        }
+                        
+                    case "Rate Accomodation":
+
+                    case "Show bookings":
+
                     default:
                         result=memory;
                 }
@@ -183,23 +220,6 @@ public class workerNode {
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
-        }
-
-        // Method to process the operation
-        private Map<String, Map<String, String>> processOperation(String operation, Map<String, Map<String, String>> memory, Map<String, Map<String, String>> data) {
-            // New map to store rooms in Area3
-            Map<String, Map<String, String>> result = new HashMap<>();
-
-            if (operation.equals("Rent Accommodation")) {
-                
-            }
-            else if (operation.equals("Rate Accommodation")) {
-                
-            }
-            else if (operation.equals("Add Accommodation")) {
-                
-            }
-            return result;
         }
     }
 }
