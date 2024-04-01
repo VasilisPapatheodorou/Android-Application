@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Random;
 
-//javac -cp json-simple-1.1.1.jar master.java
-//java -cp .;json-simple-1.1.1.jar master
+
 
 public class master {
     public static void main(String[] args) {

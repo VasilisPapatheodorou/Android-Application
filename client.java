@@ -8,6 +8,9 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import java.util.ArrayList;
 
+//javac -cp json-simple-1.1.1.jar client.java
+//java -cp .;json-simple-1.1.1.jar client
+
 public class client {
     @SuppressWarnings("unused")
     public static void main(String[] args) throws ParseException {
