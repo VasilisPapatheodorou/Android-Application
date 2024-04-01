@@ -8,7 +8,7 @@
       "noOfReviews": 66,
       "bookings":[],
       "price":70,
-      "roomImage": "C:\\Users\\johnm\\Desktop\\εργασια"
+      "roomImage": "C:\\Users\\Bill\\Documents\\GitHub\\Android-Application"
     },
     {
       "room":"1014",
@@ -18,7 +18,7 @@
       "noOfReviews": 76,
       "bookings":[],
       "price":100,
-      "roomImage": "C:\\Users\\johnm\\Desktop\\εργασια"
+      "roomImage": "C:\\Users\\Bill\\Documents\\GitHub\\Android-Application"
     }
   ],
   "John":[
@@ -30,7 +30,7 @@
       "noOfReviews": 65,
       "bookings":[],
       "price":80,
-      "roomImage": "C:\\Users\\johnm\\Desktop\\εργασια"
+      "roomImage": "C:\\Users\\Bill\\Documents\\GitHub\\Android-Application"
     }
   ]
 }
