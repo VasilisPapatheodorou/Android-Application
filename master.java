@@ -7,13 +7,25 @@ import java.util.Random;
 
 
 public class master {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         // Create a Random object
         Random random = new Random();
         // Generate a random integer between 2 and 4 to initialize the workers
         int NumberofWorkers = random.nextInt(3) + 2;
+        //List of nodes
+        ArrayList<Process> nodeList = new ArrayList<Process>();
+        
         //Initialize workers
+        for(Integer i=0; i<=NumberofWorkers; i++){
+            String command = "cmd /c start cmd.exe /K cd C:\\Users\\Bill\\Documents\\GitHub\\Android-Application && java workerNode";
+            // Execute command (e.g., run a Java file)
+            Process process = Runtime.getRuntime().exec(command);
+            nodeList.add(process);
+            System.out.println("worker "+process+" is running");
+        }
+        System.out.println(nodeList);
+        
 
         try {
 
@@ -56,7 +68,6 @@ public class master {
                 ObjectOutputStream outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
                 @SuppressWarnings("unused")
                 ObjectInputStream inputStream = new ObjectInputStream(clientSocket.getInputStream());
-
 
                 // Read client's choice
                 String clientChoice = input.readLine();
@@ -230,6 +241,13 @@ public class master {
                 e.printStackTrace();
             }
         }
+        private static int Hash(String roomName, int numberOfNodes) {
+            // Calculate the hash code for the roomName
+            int hashCode = roomName.hashCode();
+            // Calculate the modulo operation with numberOfNodes
+            return Math.abs(hashCode) % numberOfNodes;
+        }
+            
     }
  
 }

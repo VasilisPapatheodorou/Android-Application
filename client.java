@@ -22,7 +22,6 @@ public class client {
             ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
             ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
 
-
             // Send the option menu to the client
             System.out.println("Welcome to Booking App!");
             System.out.println("Choose action by number");
