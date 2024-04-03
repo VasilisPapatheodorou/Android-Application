@@ -8,10 +8,10 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import java.util.ArrayList;
 
-//javac -cp json-simple-1.1.1.jar client.java
-//java -cp .;json-simple-1.1.1.jar client
+//javac -cp json-simple-1.1.1.jar manager.java
+//java -cp .;json-simple-1.1.1.jar manager
 
-public class client {
+public class manager {
     @SuppressWarnings("unused")
     public static void main(String[] args) throws ParseException {
         try {
@@ -25,12 +25,10 @@ public class client {
             // Send the option menu to the client
             System.out.println("Welcome to Booking App!");
             System.out.println("Choose action by number");
-            System.out.println("1. Add Accommodation");
-            System.out.println("2. Rent accomodation");
-            System.out.println("3. Rate accomodation");
-            System.out.println("4. Search Accommodation");
-            System.out.println("5. Show reservations");
-            System.out.println("6. Exit");
+            System.out.println("1. Add Accomodation");
+            System.out.println("2. Add available dates for accomodation");
+            System.out.println("3. Show reservations");
+            System.out.println("4. Exit");
 
             // Read user input from the console and send it to the server
             
@@ -43,7 +41,7 @@ public class client {
             String userInput2 = readUserInput();
 
             switch (userInput1) {
-                case "1":
+                case "Add Accomodation":
                     outputStream.writeObject(parseJsonFromFile(userInput2));
                     break;
             
@@ -154,5 +152,3 @@ public class client {
 
     
 }
-
-

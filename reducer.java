@@ -32,11 +32,12 @@ public class reducer {
 
                     // Read the map sent by the worker
                     @SuppressWarnings("unchecked")
+                    
                     Map<String, ArrayList<Map<String,String>>> resultFromWorker = (Map<String, ArrayList<Map<String,String>>>) inputStream.readObject(); //HashMap
                     
                     // Aggregate the result from this worker
-                    aggregateResult(aggregatedResult, resultFromWorker);
-                    
+                    //aggregateResult(aggregatedResult, resultFromWorker);
+              
                     // Connect to master
                     Socket MasterSocket = new Socket("localhost", 12348);
                     System.out.println("Connected to Master");
@@ -44,7 +45,7 @@ public class reducer {
 
                     // Creating output stream for master
                     ObjectOutputStream outputMasterStream = new ObjectOutputStream(MasterSocket.getOutputStream());
-                    outputMasterStream.writeObject(aggregatedResult);
+                    outputMasterStream.writeObject(resultFromWorker);
 
                     // Close connections
                     MasterSocket.close();

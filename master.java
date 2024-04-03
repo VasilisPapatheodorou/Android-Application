@@ -7,6 +7,8 @@ import java.util.Random;
 
 
 public class master {
+    private static final String[] WORKER_NODE_IPS = {"worker1_ip", "worker2_ip", "worker3_ip", "worker4_ip"}; // IPs of worker nodes
+    private static final int[] WORKER_NODE_PORTS = {12346, 12347, 12348, 12349}; // Ports of worker nodes
     public static void main(String[] args) throws IOException {
 
         // Create a Random object
@@ -17,7 +19,8 @@ public class master {
         ArrayList<Process> nodeList = new ArrayList<Process>();
         
         //Initialize workers
-        for(Integer i=0; i<=NumberofWorkers; i++){
+        
+        for(Integer i=1; i<=NumberofWorkers; i++){
             String command = "cmd /c start cmd.exe /K cd C:\\Users\\Bill\\Documents\\GitHub\\Android-Application && java workerNode";
             // Execute command (e.g., run a Java file)
             Process process = Runtime.getRuntime().exec(command);
@@ -71,21 +74,35 @@ public class master {
 
                 // Read client's choice
                 String clientChoice = input.readLine();
-
+                System.out.println(clientChoice);
                 // Process client's choice
                 switch (clientChoice) {
-                    case "1":
+                    case "Add Accomodation":
                         // Ask for data to add accomodation
                         output.println("Insert Data");
                         // Read client's data 
                         @SuppressWarnings("unchecked") Map<String, ArrayList<Map<String,String>>> Data = (Map<String, ArrayList<Map<String,String>>>) inputStream.readObject();
                         
-                        // Connect to worker node and perform "Add Accommodation" operation
-                        insertAccomodation("Add Accommodation",Data);
+                        //Decide on wich workerNode every room will be stored
+
+                        // Iterate over each entry in the map
+                        for (Map.Entry<String, ArrayList<Map<String, String>>> entry : Data.entrySet()) {
+                            String person = entry.getKey();
+                            ArrayList<Map<String, String>> rooms = entry.getValue();
+
+                            // Iterate over each item in the list
+                            for (Map<String, String> roomData : rooms) {
+                                // Access the "room" key of the roomData map
+                                String roomName = roomData.get("room");
+                                int node = Hash(roomName, numOfWorkers);
+                                // Connect to worker node and perform "Add Accommodation" operation
+                                insertAccomodation("Add Accomodation",Data,node);
+                            }
+                        }
                         //build connection with reducer
-                        connectWithReducer();
+                        //connectWithReducer();
                         break;
-                    case "2":
+                    case "Rent Accomodation":
 
                         // Ask for room to rent
                         output.println("Choose room");
@@ -101,10 +118,10 @@ public class master {
                         //building connection with reducer
                         connectWithReducer();
                         break;
-                    case "3":
+                    case "Rate accomodation":
                         output.println("Rate accomodation");
                         break;
-                    case "4":
+                    case "Search Accomodation":
                         // Ask for data
                         output.println("Choose filter:");
                         // Read client filter
@@ -113,14 +130,14 @@ public class master {
                         output.println("Insert "+filter+" of choice:");
                         String filter2 = input.readLine();
                         // Connect to worker node and perform "Search Accommodation" operation
-                        searchAccomodation("Search Accommodation",filter,filter2);
+                        searchAccomodation("Search Accomodation",filter,filter2);
                         //building connection with reducer
                         connectWithReducer();
                         break;
-                    case "5":
+                    case "Show reservations":
                         output.println("Show reservations");
                         break;
-                    case "6":
+                    case "Exit":
                         // Exit
                         output.println("Goodbye!");
                         break;
@@ -149,12 +166,15 @@ public class master {
         }
 
         // Method to connect to worker node and perform operation add accomodation
-        private void insertAccomodation(String operation,Map<String, ArrayList<Map<String,String>>> Data) throws ClassNotFoundException {
+        private void insertAccomodation(String operation,Map<String, ArrayList<Map<String,String>>> Data, Integer node) throws ClassNotFoundException {
 
             try {
+
+                String workerIP = WORKER_NODE_IPS[node];
+                int workerPort = WORKER_NODE_PORTS[node];
                 // Connect to worker node
-                Socket workerNodeSocket = new Socket("localhost", 12346); // Worker node's port
-                System.out.println("Connected to worker node");
+                Socket workerNodeSocket = new Socket(workerIP, workerPort); // Worker node's port
+                System.out.println("Connected to worker node with IP: "+workerIP+" and port "+workerPort);
 
                 // Creating input and output streams for communication with worker node
                 BufferedReader workerInput = new BufferedReader(new InputStreamReader(workerNodeSocket.getInputStream()));

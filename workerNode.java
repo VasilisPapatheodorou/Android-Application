@@ -58,7 +58,7 @@ public class workerNode {
 
                 //Depending on the operation we execute the appropriate code
                 switch (operation) {
-                    case "Add Accommodation":
+                    case "Add Accomodation":
                         // Read the map sent by the master
                         @SuppressWarnings("unchecked")
                         Map<String, ArrayList<Map<String,String>>> data = (Map<String, ArrayList<Map<String,String>>>) inputStream.readObject(); //HashMap
@@ -102,7 +102,7 @@ public class workerNode {
                         }
                         break;
 
-                    case "Search Accommodation":
+                    case "Search Accomodation":
                         // Read the filter sent by the master
                         String filter = input.readLine();
                         String filter2 = input.readLine();
