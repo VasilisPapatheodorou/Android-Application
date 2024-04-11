@@ -19,6 +19,16 @@
       "bookings":[],
       "price":100,
       "roomImage": "C:\\Users\\Bill\\Documents\\GitHub\\Android-Application"
+    },
+    {
+      "room":"1015",
+      "noOfPersons": 10,
+      "area": "Area1",
+      "stars": 4,
+      "noOfReviews": 76,
+      "bookings":[],
+      "price":100,
+      "roomImage": "C:\\Users\\Bill\\Documents\\GitHub\\Android-Application"
     }
   ],
   "John":[
@@ -30,6 +40,26 @@
       "noOfReviews": 65,
       "bookings":[],
       "price":80,
+      "roomImage": "C:\\Users\\Bill\\Documents\\GitHub\\Android-Application"
+    },
+    {
+      "room":"1011",
+      "noOfPersons": 2,
+      "area": "Area5",
+      "stars": 4,
+      "noOfReviews": 65,
+      "bookings":[],
+      "price":80,
+      "roomImage": "C:\\Users\\Bill\\Documents\\GitHub\\Android-Application"
+    },
+    {
+      "room":"1016",
+      "noOfPersons": 10,
+      "area": "Area1",
+      "stars": 4,
+      "noOfReviews": 76,
+      "bookings":[],
+      "price":100,
       "roomImage": "C:\\Users\\Bill\\Documents\\GitHub\\Android-Application"
     }
   ]

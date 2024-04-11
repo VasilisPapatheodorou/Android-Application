@@ -2,14 +2,14 @@ import java.io.*;
 import java.net.*;
 
 
-//javac -cp json-simple-1.1.1.jar client.java
+//javac -cp json-simple-1.1.1.jar renter.java
 //java -cp .;json-simple-1.1.1.jar client
 
 public class renter {
     @SuppressWarnings("unused")
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ClassNotFoundException {
         try {
-            Socket socket = new Socket("localhost", 12345); // Connect to localhost on port 12345
+            Socket socket = new Socket("192.168.1.5", 12345); // Connect to localhost on port 12345
 
             BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
@@ -52,6 +52,8 @@ public class renter {
             while ((response = input.readLine()) != null) {
                 System.out.println("Server: " + response);
             }
+
+            System.out.println(input.readLine());
 
             // Close connections
             input.close();
