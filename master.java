@@ -2,34 +2,13 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Random;
-
-
 
 public class master {
-    private static final String[] WORKER_NODE_IPS = {"worker1_ip", "worker2_ip", "worker3_ip", "worker4_ip"}; // IPs of worker nodes
-    private static final int[] WORKER_NODE_PORTS = {12346, 12347, 12348, 12349}; // Ports of worker nodes
-    public static void main(String[] args) throws IOException {
-
-        // Create a Random object
-        Random random = new Random();
-        // Generate a random integer between 2 and 4 to initialize the workers
-        int NumberofWorkers = random.nextInt(3) + 2;
-        //List of nodes
-        ArrayList<Process> nodeList = new ArrayList<Process>();
+    private static final String[] WORKER_NODE_IPS = {"192.168.1.13", "192.168.1.13","192.168.1.13"}; // IPs of worker nodes
+    private static final int[] WORKER_NODE_PORTS = {12355, 12347,12348}; // Ports of worker nodes
+    private static Integer id=0; 
+    public static void main(String[] args) throws IOException { 
         
-        //Initialize workers
-        
-        for(Integer i=1; i<=NumberofWorkers; i++){
-            String command = "cmd /c start cmd.exe /K cd C:\\Users\\Bill\\Documents\\GitHub\\Android-Application && java workerNode";
-            // Execute command (e.g., run a Java file)
-            Process process = Runtime.getRuntime().exec(command);
-            nodeList.add(process);
-            System.out.println("worker "+process+" is running");
-        }
-        System.out.println(nodeList);
-        
-
         try {
 
             try (ServerSocket serverSocket = new ServerSocket(12345)) {
@@ -38,9 +17,10 @@ public class master {
                 while (true) {
                     Socket clientSocket = serverSocket.accept(); // Accept client connection
                     System.out.println("Client connected: " + clientSocket);
-
+                    id++;
+                    System.out.println(id);
                     // Start a new thread to handle client requests
-                    ClientHandler clientHandler = new ClientHandler(clientSocket,NumberofWorkers);
+                    ClientHandler clientHandler = new ClientHandler(clientSocket,id);
                     new Thread(clientHandler).start();
                     
                 }
@@ -53,12 +33,12 @@ public class master {
     // ClientHandler class to handle each client connection
     private static class ClientHandler implements Runnable {
         private final Socket clientSocket;
-        @SuppressWarnings("unused")
-        private Integer numOfWorkers;
+        Integer id;
+        Object result;
 
-        public ClientHandler(Socket clientSocket, Integer numOfWorkers) {
+        public ClientHandler(Socket clientSocket, Integer id) {
             this.clientSocket = clientSocket;
-            this.numOfWorkers = numOfWorkers;
+            this.id=id;
         }
 
         @SuppressWarnings("unused")
@@ -69,20 +49,20 @@ public class master {
                 BufferedReader input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 PrintWriter output = new PrintWriter(clientSocket.getOutputStream(), true);
                 ObjectOutputStream outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
-                @SuppressWarnings("unused")
                 ObjectInputStream inputStream = new ObjectInputStream(clientSocket.getInputStream());
 
                 // Read client's choice
                 String clientChoice = input.readLine();
                 System.out.println(clientChoice);
+                System.out.println("ok");
                 // Process client's choice
                 switch (clientChoice) {
                     case "Add Accomodation":
                         // Ask for data to add accomodation
                         output.println("Insert Data");
                         // Read client's data 
-                        @SuppressWarnings("unchecked") Map<String, ArrayList<Map<String,String>>> Data = (Map<String, ArrayList<Map<String,String>>>) inputStream.readObject();
-                        
+                        Map<String, ArrayList<Map<String,String>>> Data = (Map<String, ArrayList<Map<String,String>>>) inputStream.readObject();
+
                         //Decide on wich workerNode every room will be stored
 
                         // Iterate over each entry in the map
@@ -94,9 +74,10 @@ public class master {
                             for (Map<String, String> roomData : rooms) {
                                 // Access the "room" key of the roomData map
                                 String roomName = roomData.get("room");
-                                int node = Hash(roomName, numOfWorkers);
+                                int node = Hash(roomName, WORKER_NODE_IPS.length);
+                                System.out.println(node);
                                 // Connect to worker node and perform "Add Accommodation" operation
-                                insertAccomodation("Add Accomodation",Data,node);
+                                insertAccomodation("Add Accomodation",roomData,node,person);
                             }
                         }
                         //build connection with reducer
@@ -114,14 +95,16 @@ public class master {
                         output.println("Insert ending of rent");
                         String ending = input.readLine();
                         // Connect to worker node and perform "Search Accommodation" operation
-                        rentAccomodation("Rent Accomodation",choice,beginning,ending);
+                        rentAccomodation("Rent Accomodation",choice,beginning,ending,id);
                         //building connection with reducer
-                        connectWithReducer();
+                        result = connectWithReducer();
+                        output.println(result.toString());
                         break;
                     case "Rate accomodation":
                         output.println("Rate accomodation");
                         break;
                     case "Search Accomodation":
+                        //8a mporouse na pairnei san eisodo mia Map me ola ta filtra
                         // Ask for data
                         output.println("Choose filter:");
                         // Read client filter
@@ -130,12 +113,34 @@ public class master {
                         output.println("Insert "+filter+" of choice:");
                         String filter2 = input.readLine();
                         // Connect to worker node and perform "Search Accommodation" operation
-                        searchAccomodation("Search Accomodation",filter,filter2);
+                        searchAccomodation("Search Accomodation",filter,filter2,id);
                         //building connection with reducer
-                        connectWithReducer();
+                        result = connectWithReducer();
+                        output.println(result.toString());
                         break;
                     case "Show reservations":
-                        output.println("Show reservations");
+                        // Ask for data
+                        output.println("Insert Name:");
+                        // Read client filter
+                        String name = input.readLine();
+                        // Connect to worker node and perform "Show reservations" operation
+                        showReservations("Show reservations",name,id);
+                        //building connection with reducer
+                        result = connectWithReducer();
+                        output.println(result.toString());
+                        break;
+                    case "Add dates":
+                        // Ask for room to rent
+                        output.println("Choose room");
+                        // Read client's choice
+                        String choice2 = input.readLine();
+                        // Ask for date
+                        output.println("Insert beginning of availability");
+                        String beginning1 = input.readLine();
+                        output.println("Insert ending of availability");
+                        String ending1 = input.readLine();
+                        // Connect to worker node and perform "Add dates" operation
+                        addDates("Add dates",choice2,beginning1,ending1,id);
                         break;
                     case "Exit":
                         // Exit
@@ -154,25 +159,55 @@ public class master {
             }
         }
 
-        private void connectWithReducer() throws IOException, ClassNotFoundException{
-            try (ServerSocket serverSocket = new ServerSocket(12348)) {
+        private void showReservations(String operation, String name, Integer id) {
+            try {
+                // Connect to worker node
+                for(int i=0; i<WORKER_NODE_IPS.length; i++){
+                    Socket workerNodeSocket = new Socket(WORKER_NODE_IPS[i], WORKER_NODE_PORTS[i]); // Worker node's port
+                    System.out.println("Connected to worker node with IP: "+WORKER_NODE_IPS[i]+" and port "+WORKER_NODE_PORTS[i]);
+
+                    // Creating input and output streams for communication with worker node
+                    BufferedReader workerInput = new BufferedReader(new InputStreamReader(workerNodeSocket.getInputStream()));
+                    PrintWriter workerOutput = new PrintWriter(workerNodeSocket.getOutputStream(), true);
+
+                    // Creating input and output streams for communication
+                    ObjectOutputStream outputStream = new ObjectOutputStream(workerNodeSocket.getOutputStream());
+                    ObjectInputStream inputStream = new ObjectInputStream(workerNodeSocket.getInputStream());
+
+                    // Send operation and data to worker node
+                    outputStream.writeObject(id);
+                    outputStream.writeObject(operation);
+                    outputStream.writeObject(name);
+        
+                    // Close connections
+                    workerInput.close();
+                    workerOutput.close();
+                    workerNodeSocket.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        private Object connectWithReducer() throws IOException, ClassNotFoundException{
+            try (ServerSocket serverSocket = new ServerSocket(12353)) {
                 System.out.println("Server started. Waiting for reducer...");
                 Socket reducerSocket = serverSocket.accept(); // Accept reducer connection
                 System.out.println("Reducer connected: " + reducerSocket);
                 // Creating input stream for communication with reducer
                 ObjectInputStream inputStream = new ObjectInputStream(reducerSocket.getInputStream());
-                System.out.println(inputStream.readObject());
+                return inputStream.readObject();
             }
         }
 
         // Method to connect to worker node and perform operation add accomodation
-        private void insertAccomodation(String operation,Map<String, ArrayList<Map<String,String>>> Data, Integer node) throws ClassNotFoundException {
+        private void insertAccomodation(String operation,Map<String, String> Data, Integer node, String person) throws ClassNotFoundException {
 
             try {
 
                 String workerIP = WORKER_NODE_IPS[node];
                 int workerPort = WORKER_NODE_PORTS[node];
-                // Connect to worker node
+                // Connect to workerNode to insert data
                 Socket workerNodeSocket = new Socket(workerIP, workerPort); // Worker node's port
                 System.out.println("Connected to worker node with IP: "+workerIP+" and port "+workerPort);
 
@@ -186,8 +221,12 @@ public class master {
                 ObjectInputStream inputStream = new ObjectInputStream(workerNodeSocket.getInputStream());
 
                 // Send operation and data to worker node
-                workerOutput.println(operation);
+                outputStream.writeObject(id);
+                outputStream.writeObject(operation);
+                outputStream.writeObject(person);
+                System.out.println(Data);
                 outputStream.writeObject(Data);
+                
                 
                 
                 // Close connections
@@ -201,62 +240,70 @@ public class master {
 
         // Method to connect to worker node and perform operation search/rent accomodation
         @SuppressWarnings("unused")
-        private void searchAccomodation(String operation, String filter, String filter2) throws ClassNotFoundException{
+        private void searchAccomodation(String operation, String filter, String filter2,Integer id) throws ClassNotFoundException{
 
             try {
                 // Connect to worker node
-                Socket workerNodeSocket = new Socket("localhost", 12346); // Worker node's port
-                System.out.println("Connected to worker node");
+                for(int i=0; i<WORKER_NODE_IPS.length; i++){
+                    Socket workerNodeSocket = new Socket(WORKER_NODE_IPS[i], WORKER_NODE_PORTS[i]); // Worker node's port
+                    System.out.println("Connected to worker node with IP: "+WORKER_NODE_IPS[i]+" and port "+WORKER_NODE_PORTS[i]);
 
-                // Creating input and output streams for communication with worker node
-                BufferedReader workerInput = new BufferedReader(new InputStreamReader(workerNodeSocket.getInputStream()));
-                PrintWriter workerOutput = new PrintWriter(workerNodeSocket.getOutputStream(), true);
+                    // Creating input and output streams for communication with worker node
+                    BufferedReader workerInput = new BufferedReader(new InputStreamReader(workerNodeSocket.getInputStream()));
+                    PrintWriter workerOutput = new PrintWriter(workerNodeSocket.getOutputStream(), true);
 
-                // Creating input and output streams for communication
-                ObjectOutputStream outputStream = new ObjectOutputStream(workerNodeSocket.getOutputStream());
-                ObjectInputStream inputStream = new ObjectInputStream(workerNodeSocket.getInputStream());
+                    // Creating input and output streams for communication
+                    ObjectOutputStream outputStream = new ObjectOutputStream(workerNodeSocket.getOutputStream());
+                    ObjectInputStream inputStream = new ObjectInputStream(workerNodeSocket.getInputStream());
 
-                // Send operation and data to worker node
-                workerOutput.println(operation);
-                workerOutput.println(filter);
-                workerOutput.println(filter2);
-                
-                
-                // Close connections
-                workerInput.close();
-                workerOutput.close();
-                workerNodeSocket.close();
+                    // Send operation and data to worker node
+                    outputStream.writeObject(id);
+                    outputStream.writeObject(operation);
+                    outputStream.writeObject(filter);
+                    outputStream.writeObject(filter2);
+                    
+        
+                    // Close connections
+                    workerInput.close();
+                    workerOutput.close();
+                    workerNodeSocket.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
         
         @SuppressWarnings("unused")
-        private void rentAccomodation(String operation, String room, String beginning,String ending) throws ClassNotFoundException{
+        private void rentAccomodation(String operation, String room, String beginning,String ending,Integer id) throws ClassNotFoundException{
 
             try {
                 // Connect to worker node
-                Socket workerNodeSocket = new Socket("localhost", 12346); // Worker node's port
-                System.out.println("Connected to worker node");
+                for(int i=0; i<WORKER_NODE_IPS.length; i++){
+                    Socket workerNodeSocket = new Socket(WORKER_NODE_IPS[i], WORKER_NODE_PORTS[i]); // Worker node's port
+                    System.out.println("Connected to worker node with IP: "+WORKER_NODE_IPS[i]+" and port "+WORKER_NODE_PORTS[i]);
 
-                // Creating input and output streams for communication with worker node
-                BufferedReader workerInput = new BufferedReader(new InputStreamReader(workerNodeSocket.getInputStream()));
-                PrintWriter workerOutput = new PrintWriter(workerNodeSocket.getOutputStream(), true);
 
-                // Creating input and output streams for communication
-                ObjectOutputStream outputStream = new ObjectOutputStream(workerNodeSocket.getOutputStream());
-                ObjectInputStream inputStream = new ObjectInputStream(workerNodeSocket.getInputStream());
+                    // Creating input and output streams for communication with worker node
+                    BufferedReader workerInput = new BufferedReader(new InputStreamReader(workerNodeSocket.getInputStream()));
+                    PrintWriter workerOutput = new PrintWriter(workerNodeSocket.getOutputStream(), true);
 
-                // Send operation and data to worker node
-                workerOutput.println(operation);
-                workerOutput.println(room);
-                workerOutput.println(beginning);
-                workerOutput.println(ending);
-                
-                // Close connections
-                workerInput.close();
-                workerOutput.close();
-                workerNodeSocket.close();
+                    // Creating input and output streams for communication
+                    ObjectOutputStream outputStream = new ObjectOutputStream(workerNodeSocket.getOutputStream());
+                    ObjectInputStream inputStream = new ObjectInputStream(workerNodeSocket.getInputStream());
+
+                    // Send operation and data to worker node
+                    outputStream.writeObject(id);
+                    outputStream.writeObject(operation);
+                    outputStream.writeObject(room);
+                    outputStream.writeObject(beginning);
+                    outputStream.writeObject(ending);
+                    
+                    
+                    // Close connections
+                    workerInput.close();
+                    workerOutput.close();
+                    workerNodeSocket.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -265,7 +312,42 @@ public class master {
             // Calculate the hash code for the roomName
             int hashCode = roomName.hashCode();
             // Calculate the modulo operation with numberOfNodes
-            return Math.abs(hashCode) % numberOfNodes;
+            return Math.abs(hashCode) % (numberOfNodes);
+        }
+
+        @SuppressWarnings("unused")
+        private void addDates(String operation, String room, String beginning,String ending,Integer id) throws ClassNotFoundException{
+
+            try {
+                // Connect to worker node
+                Integer i = Hash(room, WORKER_NODE_IPS.length);
+                Socket workerNodeSocket = new Socket(WORKER_NODE_IPS[i], WORKER_NODE_PORTS[i]); // Worker node's port
+                System.out.println("Connected to worker node with IP: "+WORKER_NODE_IPS[i]+" and port "+WORKER_NODE_PORTS[i]);
+
+
+                // Creating input and output streams for communication with worker node
+                BufferedReader workerInput = new BufferedReader(new InputStreamReader(workerNodeSocket.getInputStream()));
+                PrintWriter workerOutput = new PrintWriter(workerNodeSocket.getOutputStream(), true);
+
+                // Creating input and output streams for communication
+                ObjectOutputStream outputStream = new ObjectOutputStream(workerNodeSocket.getOutputStream());
+                ObjectInputStream inputStream = new ObjectInputStream(workerNodeSocket.getInputStream());
+
+                // Send operation and data to worker node
+                outputStream.writeObject(id);
+                outputStream.writeObject(operation);
+                outputStream.writeObject(room);
+                outputStream.writeObject(beginning);
+                outputStream.writeObject(ending);
+                
+                
+                // Close connections
+                workerInput.close();
+                workerOutput.close();
+                workerNodeSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
             
     }

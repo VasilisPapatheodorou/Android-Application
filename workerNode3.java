@@ -12,14 +12,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class workerNode {
+public class workerNode3 {
     // Shared memory
     private static Map<String, ArrayList<Map<String,Object>>> memory = new HashMap<>();
     
     public static void main(String[] args) throws IOException {
         
         @SuppressWarnings("resource")
-        ServerSocket serverSocket = new ServerSocket(12355);
+        ServerSocket serverSocket = new ServerSocket(12348);
         System.out.println("Worker node started. Waiting for server...");
         
         while (true) {
@@ -330,7 +330,7 @@ public class workerNode {
     }
     private static void connectReducer(Integer id, Map<String, ArrayList<Map<String,Object>>> result) throws IOException {
         // Connect to reducer
-        Socket reducerSocket = new Socket("localhost", 12350);
+        Socket reducerSocket = new Socket("192.168.1.5", 12350);
         System.out.println("Connected to Reducer");
 
         // Creating output stream for communication with reducer

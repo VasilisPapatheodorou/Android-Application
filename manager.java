@@ -15,7 +15,7 @@ public class manager {
     @SuppressWarnings("unused")
     public static void main(String[] args) throws ParseException {
         try {
-            Socket socket = new Socket("192.168.1.5", 12345); // Connect to localhost on port 12345
+            Socket socket = new Socket("localhost", 12345); // Connect to localhost on port 12345
 
             BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
@@ -26,7 +26,7 @@ public class manager {
             System.out.println("Welcome to Booking App!");
             System.out.println("Choose action by number");
             System.out.println("1. Add Accomodation");
-            System.out.println("2. Add available dates for accomodation");
+            System.out.println("2. Add dates");
             System.out.println("3. Show reservations");
             System.out.println("4. Exit");
 
@@ -34,10 +34,9 @@ public class manager {
             
             String userInput1 = readUserInput();
             sendToServer(output, userInput1);
-
+            
             // Read and print server response
             readAndPrintResponse(input);
-            
             String userInput2 = readUserInput();
 
             switch (userInput1) {
@@ -49,14 +48,12 @@ public class manager {
                     sendToServer(output, userInput2);
                     break;
             }
-
+            
             readAndPrintResponse(input);
-
             String userInput3 = readUserInput();
             sendToServer(output, userInput3);
 
             readAndPrintResponse(input);
-
             String userInput4 = readUserInput();
             sendToServer(output, userInput4);
 
@@ -65,7 +62,6 @@ public class manager {
             while ((response = input.readLine()) != null) {
                 System.out.println("Server: " + response);
             }
-
             // Close connections
             input.close();
             output.close();

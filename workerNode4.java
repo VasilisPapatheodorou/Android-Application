@@ -12,14 +12,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class workerNode {
+public class workerNode4 {
     // Shared memory
-    private static Map<String, ArrayList<Map<String,Object>>> memory = new HashMap<>();
+    private static Map<String, ArrayList<Map<String,String>>> memory = new HashMap<>();
     
     public static void main(String[] args) throws IOException {
         
         @SuppressWarnings("resource")
-        ServerSocket serverSocket = new ServerSocket(12355);
+        ServerSocket serverSocket = new ServerSocket(12349);
         System.out.println("Worker node started. Waiting for server...");
         
         while (true) {
@@ -36,13 +36,13 @@ public class workerNode {
     // ClientHandler class to handle each client connection
     private static class ClientHandler implements Runnable {
         private final Socket serverConnection;
-        private Map<String, ArrayList<Map<String,Object>>> memory;
-        private ArrayList<Map<String,Object>> value;
+        private Map<String, ArrayList<Map<String,String>>> memory;
+        private ArrayList<Map<String,String>> value;
 
-        public ClientHandler(Socket serverConnection, Map<String, ArrayList<Map<String,Object>>> memory) {
+        public ClientHandler(Socket serverConnection, Map<String, ArrayList<Map<String,String>>> memory) {
             this.serverConnection = serverConnection;
             this.memory = memory;
-            this.value = new ArrayList<Map<String,Object>>();
+            this.value = new ArrayList<Map<String,String>>();
         }
 
         @Override
@@ -55,46 +55,27 @@ public class workerNode {
             ) {
                 // Read operation from server
                 //read id 
-                //Integer id = input.read();
-                Integer id = (Integer) inputStream.readObject();
+                Integer id = input.read();
 
-                String operation = (String) inputStream.readObject();
+                String operation = input.readLine();
                 System.out.println("Operation received: " + operation);
                 
                 //Initialize result
-                Map<String, ArrayList<Map<String,Object>>> result = new HashMap<>();
+                Map<String, ArrayList<Map<String,String>>> result = new HashMap<>();
                 //Depending on the operation we execute the appropriate code
                 switch (operation) {
                     case "Add Accomodation":
                     //value to define if manager already exists
                     boolean found=false;
                     //read person 
-                    String person = (String) inputStream.readObject();
+                    String person = input.readLine();
                     // Read the map sent by the master
-                    Map<String, String> inputData = (Map<String, String>) inputStream.readObject(); //HashMap
-                    // New map of type Map<String, Object>
-                    Map<String, Object> data = new HashMap<>();
-                    
-                    // Iterate through each entry in the original map
-                    for (Map.Entry<String, String> entry : inputData.entrySet()) {
-                        String key = entry.getKey();
-                        String value = entry.getValue();
-                        
-                        // Convert the string value to an object and put it into the new map
-                        if(key.equals("bookings")){
-                            // Convert the string value to an ArrayList and put it into the new map
-                            Map<LocalDate, LocalDate> bookingsMap = new HashMap<>();
-                            data.put(key, bookingsMap);
-                        }else{
-                            data.put(key, (Object) value);
-                        }
-                        
-                    }    
+                    Map<String, String> data = (Map<String, String>) inputStream.readObject(); //HashMap
                     synchronized (memory) {
                         // Iterate over the entries of the data map
-                        for (Map.Entry<String, ArrayList<Map<String,Object>>> entry : memory.entrySet()) {
+                        for (Map.Entry<String, ArrayList<Map<String,String>>> entry : memory.entrySet()) {
                             String key = entry.getKey();
-                            if (person.equals(key)){
+                            if (person==key){
                                 entry.getValue().add(data);
                                 found=true;
                             }
@@ -107,25 +88,24 @@ public class workerNode {
                             memory.put(person, value);
                         }
                     }
-                    //System.out.println(memory);
+                    result=memory;
                     break;
 
-                    case "Search Accomodation":
+                    case "Search Accommodation":
                         // Read the filter sent by the master
-                        System.out.println("ok");
-                        String filter = (String) inputStream.readObject();
-                        String filter2 = (String) inputStream.readObject();
+                        String filter = input.readLine();
+                        String filter2 = input.readLine();
                         // Process the data based on the filter
                         switch (filter) {
                             case "area":
-                                for (Map.Entry<String, ArrayList<Map<String,Object>>> entry : memory.entrySet()) {
+                                for (Map.Entry<String, ArrayList<Map<String,String>>> entry : memory.entrySet()) {
                                     
                                     String roomName = entry.getKey(); // Get the room name
-                                    ArrayList<Map<String,Object>> roomDetails = entry.getValue(); // Get the room details
+                                    ArrayList<Map<String,String>> roomDetails = entry.getValue(); // Get the room details
                                     // List to store filtered items for the current room
-                                    ArrayList<Map<String,Object>> filteredItems = new ArrayList<>();
+                                    ArrayList<Map<String,String>> filteredItems = new ArrayList<>();
                                     // Check 
-                                    for(Map<String,Object> item : roomDetails){
+                                    for(Map<String,String> item : roomDetails){
                                         if (filter2.equals(item.get("area"))) {
                                             System.out.println(item);
                                             filteredItems.add(item);
@@ -140,14 +120,14 @@ public class workerNode {
                                 }
                                 break;
                             case "capacity":
-                                for (Map.Entry<String, ArrayList<Map<String,Object>>> entry : memory.entrySet()) {
+                                for (Map.Entry<String, ArrayList<Map<String,String>>> entry : memory.entrySet()) {
                                         
                                     String roomName = entry.getKey(); // Get the room name
-                                    ArrayList<Map<String,Object>> roomDetails = entry.getValue(); // Get the room details
+                                    ArrayList<Map<String,String>> roomDetails = entry.getValue(); // Get the room details
                                     // List to store filtered items for the current room
-                                    ArrayList<Map<String,Object>> filteredItems = new ArrayList<>();
+                                    ArrayList<Map<String,String>> filteredItems = new ArrayList<>();
                                     // Check 
-                                    for(Map<String,Object> item : roomDetails){
+                                    for(Map<String,String> item : roomDetails){
                                         if (filter2.equals(item.get("noOfPersons"))) {
                                             System.out.println(item);
                                             filteredItems.add(item);
@@ -162,14 +142,14 @@ public class workerNode {
                                 }
                                 break;
                             case "price":
-                                for (Map.Entry<String, ArrayList<Map<String,Object>>> entry : memory.entrySet()) {
+                                for (Map.Entry<String, ArrayList<Map<String,String>>> entry : memory.entrySet()) {
                                         
                                     String roomName = entry.getKey(); // Get the room name
-                                    ArrayList<Map<String,Object>> roomDetails = entry.getValue(); // Get the room details
+                                    ArrayList<Map<String,String>> roomDetails = entry.getValue(); // Get the room details
                                     // List to store filtered items for the current room
-                                    ArrayList<Map<String,Object>> filteredItems = new ArrayList<>();
+                                    ArrayList<Map<String,String>> filteredItems = new ArrayList<>();
                                     // Check 
-                                    for(Map<String,Object> item : roomDetails){
+                                    for(Map<String,String> item : roomDetails){
                                         if (filter2.equals(item.get("price"))) {
                                             System.out.println(item);
                                             filteredItems.add(item);
@@ -184,14 +164,14 @@ public class workerNode {
                                 }
                                 break;
                             case "stars":
-                                for (Map.Entry<String, ArrayList<Map<String,Object>>> entry : memory.entrySet()) {
+                                for (Map.Entry<String, ArrayList<Map<String,String>>> entry : memory.entrySet()) {
                                         
                                     String roomName = entry.getKey(); // Get the room name
-                                    ArrayList<Map<String,Object>> roomDetails = entry.getValue(); // Get the room details
+                                    ArrayList<Map<String,String>> roomDetails = entry.getValue(); // Get the room details
                                     // List to store filtered items for the current room
-                                    ArrayList<Map<String,Object>> filteredItems = new ArrayList<>();
+                                    ArrayList<Map<String,String>> filteredItems = new ArrayList<>();
                                     // Check 
-                                    for(Map<String,Object> item : roomDetails){
+                                    for(Map<String,String> item : roomDetails){
                                         if (filter2.equals(item.get("stars"))) {
                                             System.out.println(item);
                                             filteredItems.add(item);
@@ -206,14 +186,14 @@ public class workerNode {
                                 }
                                 break;
                             case "date":
-                                for (Map.Entry<String, ArrayList<Map<String,Object>>> entry : memory.entrySet()) {
+                                for (Map.Entry<String, ArrayList<Map<String,String>>> entry : memory.entrySet()) {
                                         
                                     String roomName = entry.getKey(); // Get the room name
-                                    ArrayList<Map<String,Object>> roomDetails = entry.getValue(); // Get the room details
+                                    ArrayList<Map<String,String>> roomDetails = entry.getValue(); // Get the room details
                                     // List to store filtered items for the current room
-                                    ArrayList<Map<String,Object>> filteredItems = new ArrayList<>();
+                                    ArrayList<Map<String,String>> filteredItems = new ArrayList<>();
                                     // Check 
-                                    for(Map<String,Object> item : roomDetails){
+                                    for(Map<String,String> item : roomDetails){
                                         if (filter2.equals(item.get("date"))) {
                                             System.out.println(item);
                                             filteredItems.add(item);
@@ -230,12 +210,11 @@ public class workerNode {
                             default:
                                 break;
                         }
-                        connectReducer(id,result);
                         break;
                     case "Rent Accomodation":
                         // Read the filter sent by the master
-                        String roomChoice = (String) inputStream.readObject();
-                        String startDate = (String) inputStream.readObject();
+                        String roomChoice = input.readLine();
+                        String startDate = input.readLine();
                         
                         //Format String Date into a LocalDate Object
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -243,7 +222,7 @@ public class workerNode {
                         System.out.println("Original String: " + startDate);
                         System.out.println("Parsed LocalDate: " + start);
                         
-                        String endDate = (String) inputStream.readObject();
+                        String endDate = input.readLine();
                         
                         //Format String Date into a LocalDate Object
                         LocalDate end = LocalDate.parse(endDate, formatter);
@@ -253,95 +232,39 @@ public class workerNode {
                         
                         // Adding booking items to each room
                         synchronized (memory) {
-                            for (Map.Entry<String, ArrayList<Map<String, Object>>> entry : memory.entrySet()) {
-                                for(Map<String, Object> item : entry.getValue()){
-                                    if(item.get("room").equals(roomChoice)){
-                                        System.out.println(item.get("bookings"));
-                                    }
-                                    
-                                }
-                                
+                            for (Map.Entry<String, ArrayList<Map<String, String>>> entry : memory.entrySet()) {
+                                for(Map<String, String> item : entry.getValue()){}
+                                System.out.println(entry.getValue());
                                 //System.out.println(entry.getValue().get("bookings"));
                             }
                         }
-                        connectReducer(id,result);
-                        break;
-                    case "Add dates":
-                        // Read the filter sent by the master
-                        String managerRoomChoice = (String) inputStream.readObject();
-                        String managerStartDate = (String) inputStream.readObject();
                         
-                        //Format String Date into a LocalDate Object
-                        DateTimeFormatter managerFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-                        LocalDate managerStart = LocalDate.parse(managerStartDate, managerFormatter);
-                        System.out.println("Original String: " + managerStartDate);
-                        System.out.println("Parsed LocalDate: " + managerStart);
-                        
-                        String managerEndDate = (String) inputStream.readObject();
-                        
-                        //Format String Date into a LocalDate Object
-                        LocalDate managerEnd = LocalDate.parse(managerEndDate, managerFormatter);
-                        System.out.println("Original String: " + managerEndDate);
-                        System.out.println("Parsed LocalDate: " + managerEnd);
-                        System.out.println("ok");
-
-                        // Adding booking items to each room
-                        synchronized (memory) {
-                            for (Map.Entry<String, ArrayList<Map<String, Object>>> entry : memory.entrySet()) {
-                                for(Map<String, Object> item : entry.getValue()){
-                                    if(item.get("room").equals(managerRoomChoice)){
-                                        // Initialize bookings map if not already initialized
-                                        Map<LocalDate, LocalDate> bookings = (Map<LocalDate, LocalDate>) item.getOrDefault("bookings", new HashMap<>());
-                                        
-                                        // Add managerStartDate and managerEndDate to the bookings map
-                                        bookings.put(managerStart, managerEnd);
-                                        
-                                        // Update item with the modified bookings map
-                                        item.put("bookings", bookings);
-                                    }   
-                                }                                
-                            }
-                        }
-                        System.out.println(memory);
-                        break;
                     case "Rate Accomodation":
-                        
-                        connectReducer(id,result);
-                    case "Show reservations":
-                        // Read the name sent by the master
-                        String name = (String) inputStream.readObject();
-                        // Searching bookings for name
-                        synchronized (memory) {
-                            for (Map.Entry<String, ArrayList<Map<String, Object>>> entry : memory.entrySet()) {
-                                if(entry.getKey().equals(name)){
-                                    result.put(name, entry.getValue());
-                                }
-                            }                                
-                        }
-                        connectReducer(id,result);
+
+                    case "Show bookings":
+
                     default:
                         result=memory;
                 }
+
+                // Connect to reducer
+                Socket reducerSocket = new Socket("10.26.35.247", 12344);
+                System.out.println("Connected to Reducer");
+
+                // Creating output stream for communication with reducer
+                ObjectOutputStream outputToReducer = new ObjectOutputStream(reducerSocket.getOutputStream());
+
+                // Send result to reducer
+                Map<Integer,Map<String, ArrayList<Map<String,String>>>> final_result =new HashMap<>();
+                final_result.put(id,result);
+                outputToReducer.writeObject(final_result);
+
+                // Close connections
+                reducerSocket.close();
                 serverConnection.close();
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
         }
-    }
-    private static void connectReducer(Integer id, Map<String, ArrayList<Map<String,Object>>> result) throws IOException {
-        // Connect to reducer
-        Socket reducerSocket = new Socket("localhost", 12350);
-        System.out.println("Connected to Reducer");
-
-        // Creating output stream for communication with reducer
-        ObjectOutputStream outputToReducer = new ObjectOutputStream(reducerSocket.getOutputStream());
-
-        // Send result to reducer
-        Map<Integer,Map<String, ArrayList<Map<String,Object>>>> final_result =new HashMap<>();
-        final_result.put(id,result);
-        outputToReducer.writeObject(final_result);
-
-        // Close connections
-        reducerSocket.close();
     }
 }

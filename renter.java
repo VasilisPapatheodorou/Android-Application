@@ -9,7 +9,7 @@ public class renter {
     @SuppressWarnings("unused")
     public static void main(String[] args) throws ClassNotFoundException {
         try {
-            Socket socket = new Socket("192.168.1.5", 12345); // Connect to localhost on port 12345
+            Socket socket = new Socket("localhost", 12345); // Connect to localhost on port 12345
 
             BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
