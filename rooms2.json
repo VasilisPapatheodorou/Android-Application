@@ -4,8 +4,8 @@
       "room":"1012",
       "noOfPersons": 2,
       "area": "Area4",
-      "stars": 3,
-      "noOfReviews": 66,
+      "stars": 0,
+      "noOfReviews": 0,
       "bookings":[],
       "price":70,
       "roomImage": "C:\\Users\\Bill\\Documents\\GitHub\\Android-Application"
@@ -14,8 +14,18 @@
       "room":"1014",
       "noOfPersons": 10,
       "area": "Area1",
-      "stars": 4,
-      "noOfReviews": 76,
+      "stars": 0,
+      "noOfReviews": 0,
+      "bookings":[],
+      "price":100,
+      "roomImage": "C:\\Users\\Bill\\Documents\\GitHub\\Android-Application"
+    },
+    {
+      "room":"1015",
+      "noOfPersons": 10,
+      "area": "Area1",
+      "stars": 0,
+      "noOfReviews": 0,
       "bookings":[],
       "price":100,
       "roomImage": "C:\\Users\\Bill\\Documents\\GitHub\\Android-Application"
@@ -26,10 +36,30 @@
       "room":"1013", 
       "noOfPersons": 2,
       "area": "Area5",
-      "stars": 4,
-      "noOfReviews": 65,
+      "stars": 0,
+      "noOfReviews": 0,
       "bookings":[],
       "price":80,
+      "roomImage": "C:\\Users\\Bill\\Documents\\GitHub\\Android-Application"
+    },
+    {
+      "room":"1011",
+      "noOfPersons": 2,
+      "area": "Area5",
+      "stars": 0,
+      "noOfReviews": 0,
+      "bookings":[],
+      "price":80,
+      "roomImage": "C:\\Users\\Bill\\Documents\\GitHub\\Android-Application"
+    },
+    {
+      "room":"1016",
+      "noOfPersons": 10,
+      "area": "Area1",
+      "stars": 0,
+      "noOfReviews": 0,
+      "bookings":[],
+      "price":100,
       "roomImage": "C:\\Users\\Bill\\Documents\\GitHub\\Android-Application"
     }
   ]
